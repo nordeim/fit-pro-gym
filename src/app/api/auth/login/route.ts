@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
   const user = await authenticate(email, password);
   if (!user) {
     recordFailure(ip);
-    return NextResponse.json({ error: "Incorrect email or password" }, { status: 401 });
+    // Reference copy — the login alert renders this exact string.
+    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
 
   clearFailures(ip);

@@ -25,10 +25,10 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 | 🧺 **Server-truth cart** | Per-user cart lines with quantity steppers (minus disabled at 1), item-type badges, image-fallback initial tiles, live order summary (subtotal / free shipping / total), and the reference's app-level dedupe — re-adding an existing line bumps quantity with distinct toast copy |
 | ✨ **Cross-sell dialog** | Choosing a membership opens "Complete Your Setup" — featured products with one-tap add, "No, Thanks", "Go to Cart", and "Explore Full Store" actions |
 | 📦 **Checkout & orders** | Shipping-address form (street / city / state / ZIP, submit disabled until complete), order placement re-verified server-side against DB prices in a transaction, cart cleared atomically, success toast, and redirect home |
-| 🔐 **Cookie-session auth** | scrypt password hashing + HMAC-signed sessions, per-IP login rate limiting (10 fails / 15 min → 429 with `Retry-After`), login + signup routes, authenticated `/login` redirects — zero external auth dependencies |
+| 🔐 **Cookie-session auth** | scrypt password hashing + HMAC-signed sessions, per-IP login rate limiting (10 fails / 15 min → 429 with `Retry-After`), the reference's login card (real logo image, red Alert errors with the reference's exact copy), authenticated `/login` renders the form (no redirect — reference parity) — zero external auth dependencies |
 | 📱 **Reference mobile chrome** | Sticky blur header (h-16) with logo, cart badge, hamburger; the collapsible mobile menu renders from React state with `aria-expanded`/`aria-controls`, closes on route change (React's render-time adjustment pattern), and swaps the user cluster for Login when logged out |
 | 🎨 **Dark premium design system** | gray-900 canvas, glass cards (`bg-white/5` + backdrop-blur), the reference's exact brand tokens (`--gym-primary: #0ea5e9`, `--gym-secondary: #10b981`), and the reference's toast palette (green/red/blue at 20% alpha) |
-| 🧪 **Battle-tested** | 36 Vitest unit tests (db-path resolution contract, speed-line specs, shop categories, float-safe money math, serializers) + 43 Playwright e2e specs across auth, mobile navigation, home parity, shop, memberships, and cart — all green |
+| 🧪 **Battle-tested** | 40 Vitest unit tests (db-path resolution contract, speed-line specs, shop categories, 404 page-name seam, float-safe money math, serializers) + 57 Playwright e2e specs across auth, mobile navigation, home parity, icon-geometry pins, 404 surface, shop, memberships, and cart — all green |
 
 ## Screenshots
 
@@ -48,6 +48,10 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 |---|---|
 | ![Login](docs/screenshots/login-desktop.png) | ![Cross-sell](docs/screenshots/cross-sell-dialog.png) |
 
+| Signup renders the reference's 404 |
+|---|
+| ![Signup 404](docs/screenshots/signup-404.png) |
+
 ## Architecture
 
 | Layer | Technology | Version | Purpose |
@@ -56,7 +60,8 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 | UI runtime | React | 19.3 | Server Components by default, client islands for interactivity |
 | Language | TypeScript (strict) | 5.9 | End-to-end types across routes, DTOs, and tests |
 | Styling | Tailwind CSS v4 (CSS-first `@theme`) + PostCSS | 4.3 | Tokens in `src/app/globals.css` — no `tailwind.config.*` (see `docs/Tailwind-V4-Validation-Report.md`) |
-| Components | Radix primitives, shadcn-style (`src/components/ui`) | current | Accessible Select/Dialog/Label primitives themed via CSS vars |
+| Components | Radix primitives, shadcn-style (`src/components/ui`) | current | Accessible Select/Dialog/Label/Alert primitives themed via CSS vars |
+| Icons | lucide-react | 0.475.0 (pinned) | The reference's exact build version — later releases redesigned shopping-bag/dumbbell/menu (pinned by e2e icon-geometry specs) |
 | Animation | Framer Motion | 13.4 | Hero speed lines, card entrances/hovers, view transitions — `prefers-reduced-motion` aware |
 | Database | SQLite (file at `db/custom.db`) | — | Zero-config local dev; swap to PostgreSQL via `DATABASE_URL` + provider |
 | ORM | Prisma | 6.19 | Typed schema, `db push` workflow, transactional checkout |
@@ -95,7 +100,7 @@ fit-pro-gym/
 │   │   │   ├── 📂 Shop/
 │   │   │   └── 📂 Cart/
 │   │   ├── 📂 api/           # auth, products, memberships, cart, orders, health
-│   │   ├── 📂 login/ · 📂 signup/   # auth pages (no app chrome)
+│   │   ├── 📂 login/ · 📂 signup/   # login card · /signup renders the reference's 404 (no app chrome)
 │   │   ├── globals.css       # Tailwind v4 @theme + FitPro brand tokens
 │   │   └── layout.tsx        # AppProvider + Toaster
 │   ├── 📂 components/        # ui/ · layout/ · home/ · memberships/ · shop/ · cart/ · auth/
@@ -163,12 +168,12 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ## Testing
 
 ```bash
-bun run test          # Vitest — 36 unit specs (db-path, speed-lines, shop-categories, money, serializers)
+bun run test          # Vitest — 40 unit specs (db-path, speed-lines, shop-categories, 404-name, money, serializers)
 bun run typecheck     # tsc --noEmit
 bun run lint          # eslint .
 
 # E2E (Playwright): builds the standalone server, boots it on :3100 with an
-# isolated db/e2e.db, signs the demo user in once (storageState), 43 specs.
+# isolated db/e2e.db, signs the demo user in once (storageState), 57 specs.
 bun run build         # prerequisite: the standalone server must exist
 bun run test:e2e
 ```
@@ -224,7 +229,7 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 | Recon & design extraction | ✅ Complete | Reference app audited (DOM, bundle, entity API, VLM) — exact tokens/markup captured |
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
 | Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) |
-| Test suites | ✅ Complete | 36 unit + 43 e2e (incl. 15 home reference-parity specs), all green; lint + typecheck clean |
+| Test suites | ✅ Complete | 40 unit + 57 e2e (incl. 16 home reference-parity specs + 5 icon-geometry/404 pins), all green; lint + typecheck clean |
 | Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md |
 
 ## License

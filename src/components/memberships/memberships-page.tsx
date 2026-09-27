@@ -88,6 +88,7 @@ function PlanRailCard({
           "hover:shadow-lg hover:shadow-blue-500/25"
         )}
       >
+        <ShoppingCart className="mr-2 h-5 w-5" aria-hidden />
         Choose {plan.name}
       </Button>
     </motion.div>

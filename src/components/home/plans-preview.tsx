@@ -10,21 +10,14 @@ import { MembershipCard } from "@/components/memberships/membership-card";
 import { Button } from "@/components/ui/button";
 
 /**
- * Home "Choose Your Perfect Plan" section. Mirrors the reference: three
- * cards with the POPULAR plan pinned to the middle slot, a promo banner
- * above, and a "View All Plans" CTA below.
+ * Home "Choose Your Perfect Plan" section. Mirrors the reference: the three
+ * newest plans in creation-descending order (its query is
+ * Membership.list("-created_date", 3) — no positional rearrangement), a
+ * promo banner above, and a "View All Plans" CTA below. The "Most Popular"
+ * badge renders from the plan's popular flag, wherever that plan lands.
  */
 export function PlansPreview({ memberships }: { memberships: MembershipDTO[] }) {
-  // The reference pins its hardcoded Pro Athlete card to the middle slot;
-  // we generalize: [first, popular, second] (falling back to the first three).
-  const popular = memberships.find((m) => m.popular);
-  let three: MembershipDTO[] = memberships;
-  if (memberships.length >= 2 && popular) {
-    const rest = memberships.filter((m) => m.id !== popular.id);
-    three = [rest[0] ?? popular, popular, rest[1] ?? popular];
-  } else if (memberships.length > 3) {
-    three = memberships.slice(0, 3);
-  }
+  const three: MembershipDTO[] = memberships;
 
   return (
     <section className="relative overflow-hidden bg-slate-900 py-20 text-white">

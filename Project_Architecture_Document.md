@@ -10,8 +10,9 @@
 
 ---
 
-#### Revision Block — v1.1
+#### Revision Block — v1.2
 
+- `[v1.2]` Session-3 parity remediation (9 root defects, TDD-executed): lucide-react repinned from ^0.525.0 to **0.475.0** — the reference bundle's exact version (0.5xx redesigned ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users; geometry now pinned by `tests/e2e/icons.spec.ts`); login card rebuilt to the reference's DOM (real 480×480 logo asset `public/login-logo.png`, Google button, OR divider, header structure, red Alert error "Invalid email or password" with matching API copy, absolute page title "FitPro GYM App"); `/login` no longer redirects authenticated visitors (reference renders the form); `/signup` now renders the reference's branded 404 (its SPA shell serves HTTP 200 with 404 content — the reference never built a signup page); app-wide 404 page (`src/app/not-found.tsx` + `src/lib/not-found-name.ts`, unit-pinned); Memberships Choose buttons gained the reference's ShoppingCart icon; Cart title → "Cart"; `--font-sans` pinned to the reference's `ui-sans-serif, system-ui…` stack (Tailwind ≥ 4.1 ships a v3-style default); home plan preview now runs the reference's query (three newest plans by `createdAt` desc — seed reordered + hourly `createdAt` stagger for determinism). Tests: 40 unit + 57 e2e (16 home parity + 5 icon-geometry/404 pins).
 - `[v1.1]` Session-2 parity remediation: hero/memberships speed lines corrected to the reference's 8-line spec (extracted from the live DOM + bundle, pinned by `src/lib/speed-lines.test.ts`); hero gradient canvas + scrim/tint layers; Why-Choose rebuilt (glass cards, users/award/zap/star, scale-in values); Memberships rail badge → Crown at the reference's top-6+mt-10 offset; Shop toolbar → sticky card + 4-col grid + hardcoded Title Case categories (`src/lib/shop-categories.ts`); header logout buttons → `text-xs`; login card/Google button polish; broken Kettlebell seed image replaced; `NEXT_PUBLIC_SITE_URL` wired to `metadataBase`. Tests: 36 unit + 43 e2e (15 new home reference-parity specs).
 - `[CA]` Initial PAD for the completed clone: full recon → implementation → test → documentation cycle.
 - `[SYN]` Domain model mirrored 1:1 from the reference's base44 entity API (`Product`, `Membership`, `CartItem`, `Order`, `User`) — names and shapes preserved for behavioral parity.
@@ -41,7 +42,7 @@
 
 ## 1. Executive Summary
 
-FitPro GYM App is a self-hosted, production-ready clone of a base44-built gym membership and e-commerce application. The product surface is four pages — a marketing landing page (`/Home`), a membership plan catalog (`/Memberships`), a fitness store (`/Shop`), and a cart/checkout flow (`/Cart`) — plus authentication (`/login`, `/signup`). Under the hood it is a single Next.js 16 App Router application: server components render the catalog from Prisma/SQLite, typed JSON API routes own every mutation, and a custom scrypt/HMAC-cookie auth layer gates the cart and checkout. The design language (dark premium canvas, neon speed lines, glass cards, per-tier plan gradients, and the exact toast copy) is measured parity with the reference, extracted from its live DOM, computed styles, network traces, and JS bundle.
+FitPro GYM App is a self-hosted, production-ready clone of a base44-built gym membership and e-commerce application. The product surface is four pages — a marketing landing page (`/Home`), a membership plan catalog (`/Memberships`), a fitness store (`/Shop`), and a cart/checkout flow (`/Cart`) — plus authentication at `/login` (a branded 404 surface at `/signup`, mirroring the reference's unbuilt route). Under the hood it is a single Next.js 16 App Router application: server components render the catalog from Prisma/SQLite, typed JSON API routes own every mutation, and a custom scrypt/HMAC-cookie auth layer gates the cart and checkout. The design language (dark premium canvas, neon speed lines, glass cards, per-tier plan gradients, and the exact toast copy) is measured parity with the reference, extracted from its live DOM, computed styles, network traces, and JS bundle.
 
 **Why it exists:** the reference is a closed SaaS artifact (base44-hosted, entity API behind their auth). The clone reproduces the complete user-facing behavior on infrastructure you own, with a test suite that pins it.
 
@@ -59,7 +60,7 @@ FitPro GYM App is a self-hosted, production-ready clone of a base44-built gym me
 | Styling | Tailwind CSS + `@tailwindcss/postcss` | ^4.3.3 | CSS-first v4: tokens in `globals.css`, automatic content detection, zero config files — validated in `docs/Tailwind-V4-Validation-Report.md` |
 | Animation | Framer Motion | ^13.4.4 | The reference's animation engine (speed lines, card entrances, hover physics) |
 | Primitives | Radix UI (dialog, select, label, popover, slot, …) | current | Accessible overlay/form primitives, shadcn-style composition |
-| Iconography | lucide-react | ^0.525.0 | The reference's icon set, matched 1:1 |
+| Iconography | lucide-react | 0.475.0 (pinned) | The reference bundle's exact build version — icon geometry e2e-pinned; upgrades drift 7 redesigned icons |
 | Variants | class-variance-authority + clsx + tailwind-merge | current | shadcn component composition |
 | Database | SQLite | bundled | Zero-config dev; file at `db/custom.db`; PostgreSQL swap documented |
 | ORM | Prisma + `@prisma/client` | ^6.19.3 | Typed schema, `db push` workflow, `$transaction` for checkout atomicity |
@@ -82,7 +83,7 @@ FitPro GYM App is a self-hosted, production-ready clone of a base44-built gym me
 ### ADR-002 — Capitalized routes (`/Home`, `/Memberships`, `/Shop`, `/Cart`)
 
 **Context:** Next.js convention is lowercase paths; the reference app uses capitalized ones (its SPA router maps page names to `/Home` etc.).
-**Decision:** Mirror the reference exactly; `/` and `/Home` render the same page; `/login`/`/signup` stay lowercase (also reference parity).
+**Decision:** Mirror the reference exactly; `/` and `/Home` render the same page; `/login`/`/signup` stay lowercase (also reference parity — the reference's `/signup` route renders its 404, which the clone mirrors with an HTTP-200 404 page).
 **Rationale:** A clone's URL space is part of its contract (bookmarks, e2e assertions, header/footer links, the PWA `start_url`). App Router folders are case-preserving — zero cost.
 **Consequences:** Any URL "normalization" breaks parity and the e2e suite — don't.
 
@@ -247,7 +248,9 @@ fit-pro-gym/
 │   │   │   ├── Memberships/   # plan rail + cross-sell dialog
 │   │   │   ├── Shop/          # server-rendered catalog + client grid
 │   │   │   └── Cart/          # items, summary, checkout
-│   │   ├── login/ · signup/   # auth pages (no chrome)
+│   │   ├── login/            # reference login card (no chrome, no auth redirect)
+│   │   ├── signup/           # renders the reference's branded 404 (reference parity)
+│   │   ├── not-found.tsx     # app-wide 404 (HTTP 404 for unknown routes)
 │   │   ├── api/
 │   │   │   ├── health/        # liveness probe
 │   │   │   ├── auth/          # login · logout · me · register
@@ -259,22 +262,24 @@ fit-pro-gym/
 │   │   └── layout.tsx         # AppProvider + Toaster + metadata
 │   ├── components/
 │   │   ├── providers.tsx      # user/cart/toast client state
-│   │   ├── ui/                # button · card · badge · input · label · select · dialog · skeleton
+│   │   ├── ui/                # button · card · badge · input · label · select · dialog · skeleton · alert
 │   │   ├── layout/            # header (mobile nav!) · footer · toaster
 │   │   ├── home/              # hero · why-choose · plans-preview · shop-preview · cta-section · home-page
 │   │   ├── memberships/       # membership-card · memberships-page (+ cross-sell)
 │   │   ├── shop/              # shop-page (+ product card)
 │   │   ├── cart/              # cart-page (rows · summary · checkout form)
-│   │   └── auth/              # auth-form (login/signup modes)
+│   │   ├── auth/              # auth-form (reference login card)
+│   │   └── not-found-page.tsx # the reference's branded 404 surface
 │   ├── lib/
 │   │   ├── db-path.ts         # ADR-010 contract (15 unit specs)
 │   │   ├── db.ts              # Prisma singleton
 │   │   ├── auth.ts            # scrypt · HMAC sessions · rate limiter
 │   │   ├── serialize.ts       # the ONLY JSON-field parser; row → DTO
+│   │   ├── not-found-name.ts  # pathname → quoted 404 page name (4 unit specs)
 │   │   └── utils.ts           # cn · cartTotal (cents) · formatPrice · toOrderLine
 │   └── hooks/                 # (reserved)
 ├── tests/
-│   ├── e2e/                   # global-setup · auth.setup · helpers · 6 spec files (43 specs)
+│   ├── e2e/                   # global-setup · auth.setup · helpers · 8 spec files (57 specs)
 │   └── db-path.test.ts        # resolution contract
 ├── docs/
 │   ├── screenshots/           # current UI captures (desktop + mobile)
@@ -389,10 +394,10 @@ All endpoints return JSON. Mutations require the `fitpro_session` HttpOnly cooki
 
 | Layer | Runner | Scope | Entry |
 |-------|--------|-------|-------|
-| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 36 specs (db-path 15 · speed-lines 7 · shop-categories 4 · money+serializers 10) | `bun run test` |
+| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 40 specs (db-path 15 · speed-lines 7 · shop-categories 4 · not-found-name 4 · money+serializers 10) | `bun run test` |
 | Type | `tsc --noEmit` | whole repo | `bun run typecheck` |
 | Lint | ESLint 9 flat config | whole repo (incl. `react-hooks/set-state-in-effect`) | `bun run lint` |
-| E2E | Playwright | 43 specs: auth (6), mobile-navigation (9), home reference-parity (15), shop (6), memberships (6), cart (6) + setup | `bun run build && bun run test:e2e` |
+| E2E | Playwright | 57 specs: auth (8), mobile-navigation (9), home reference-parity (16), icon-geometry (2), not-found (3), shop (6), memberships (6), cart (6) + setup | `bun run build && bun run test:e2e` |
 
 **E2E harness specifics (deliberate):**
 - Boots the **production standalone** build (`bun .next/standalone/server.js`) on :3100 — testing what ships.
@@ -475,8 +480,11 @@ What was measured from the reference (DOM snapshots, computed styles, network tr
 | Cross-sell dialog | `sm:max-w-3xl bg-gray-900/80 backdrop-blur-2xl rounded-3xl border-2`, "Complete Your Setup" + 3 featured products + No Thanks/Go to Cart/Explore Full Store |
 | Shop | sticky toolbar card (`bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 sticky top-20`, 4-col grid, search `lg:col-span-2`), hardcoded Title Case categories, 3-way sort, `bg-slate-800 rounded-2xl` grid cards, `aspect-square` images, category badge, `rounded-full w-10 h-10 bg-blue-600` add button |
 | Cart | gradient canvas, rows (`bg-white/10 backdrop-blur-sm`), 16×16 image/initial tile, qty steppers (h-8 w-8), summary (Free shipping), checkout form (street/city/state/zip placeholders), `Complete Order - $X` / `Processing Order...` |
-| Login | light card, circular chip (`rounded-full ring-4 ring-white/50`), Google button, OR divider, icon inputs, dark submit |
+| Login | light card, real 480×480 logo image (`public/login-logo.png`), "FitPro GYM App" header + subtitle, Google button, OR divider, icon inputs, dark submit, error Alert "Invalid email or password", absolute page title, **no redirect when authenticated** |
+| 404 | branded light page — slate-50 canvas, `text-7xl font-light text-slate-300` giant 404, `h-0.5 w-16` divider, message quoting the missing page name, bordered Go Home button (classic home icon); `/signup` serves it with HTTP 200 (reference SPA behavior), unknown routes with HTTP 404 |
 | Toasts | exact strings + `bg-{green,red,blue}-500/20` palette, 3s dismiss |
 | Footer | 4-column grid, gradient logo, Quick Links/Support/Hours, © 2024 line |
-| Tokens | `--gym-primary:#0ea5e9` · `--gym-secondary:#10b981` · `--gym-dark:#1f2937` · `--gym-accent:#f59e0b` + stock shadcn HSL set |
+| Tokens | `--gym-primary:#0ea5e9` · `--gym-secondary:#10b981` · `--gym-dark:#1f2937` · `--gym-accent:#f59e0b` + stock shadcn HSL set · `--font-sans: ui-sans-serif, system-ui…` (reference's stack) |
+| Icons | lucide-react **0.475.0** (the reference bundle's exact version) — ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users geometry pinned by `tests/e2e/icons.spec.ts` |
+| Home preview | `Membership.list("-created_date", 3)` semantics — three newest plans by `createdAt` desc: Family Pack → Pro Athlete → Starter; popular badge renders wherever the flagged plan lands |
 | Domain | base44 entities → Prisma models, order item shape, dedupe semantics, pending status |

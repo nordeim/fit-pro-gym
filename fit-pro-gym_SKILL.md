@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.1.0
+version: 1.2.0
 last_updated: 2026-09-27
-project_state: 36 unit tests + 43 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 2)
+project_state: 40 unit tests + 57 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 3 — lucide pinned to 0.475.0, login/404/font/home-order parity)
 tags:
   - nextjs
   - tailwind-v4
@@ -81,7 +81,9 @@ toast copy, and URL casing are part of the product.
 3. **Tailwind v4 CSS-first, forever.** No `tailwind.config.*` will ever exist.
 4. **The mobile menu is state-driven, never the `hidden` attribute.**
 5. Capitalized routes (`/Home`, `/Memberships`, `/Shop`, `/Cart`) mirror the
-   reference; `/login`, `/signup` are lowercase. Do not normalize.
+   reference; `/login`, `/signup` are lowercase. Do not normalize. `/signup`
+   deliberately renders the reference's branded 404 (its route was never
+   built); `/login` renders for authenticated users (no redirect).
 
 **The CTA hierarchy:** hero "Start Your Journey" (blue-600 solid) → plan
 "Choose {name}" (per-tier gradient) → product round add buttons → cart
@@ -99,7 +101,7 @@ toast copy, and URL casing are part of the product.
 | Styling | tailwindcss + @tailwindcss/postcss | ^4.3.3 | CSS-first; tokens in globals.css |
 | Components | Radix primitives, shadcn-style | current | `src/components/ui/*` |
 | Animation | framer-motion | ^13.4.4 | `useReducedMotion` guards required |
-| Icons | lucide-react | ^0.525.0 | matched 1:1 to the reference |
+| Icons | lucide-react | **0.475.0 (pinned)** | the reference bundle's exact build version — 0.5xx redesigns 7 icons; geometry e2e-pinned |
 | ORM | prisma + @prisma/client | ^6.19.3 | SQLite; JSON-string lists |
 | DB | SQLite | — | `db/custom.db` (dev), `db/e2e.db` (e2e) |
 | State | zustand (dep) + custom AppProvider | ^5.0.15 | AppProvider is the real pattern |
@@ -171,8 +173,11 @@ regresses the repo.**
 Tailwind via the `@theme inline` block (`--color-*` mappings +
 `--radius-sm/md/lg/xl` calc chain).
 
-**Typography:** the system sans stack (`ui-sans-serif, system-ui, …`) — same
-as the reference. Hierarchy: h1 `text-4xl md:text-6xl font-bold`; section h2
+**Typography:** the reference's sans stack (`ui-sans-serif, system-ui,
+sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+'Noto Color Emoji'`) — pinned explicitly in `globals.css` as `--font-sans`
+(Tailwind ≥ 4.1 ships a different v3-style default; the reference was built
+with v4's early default). Hierarchy: h1 `text-4xl md:text-6xl font-bold`; section h2
 `text-3xl md:text-4xl font-bold` (gradient `bg-clip-text` on marketing
 headings); card h3 `text-2xl font-bold`; body `text-sm`–`text-xl`.
 
@@ -218,13 +223,14 @@ server-side and pass DTOs to client islands (`home-page.tsx` →
 
 | Folder | Files | Purpose |
 |--------|-------|---------|
-| `components/ui/` | badge, button, card, dialog, input, label, select, skeleton, speed-lines | shadcn-style primitives + the shared streak renderer |
+| `components/ui/` | alert, badge, button, card, dialog, input, label, select, skeleton, speed-lines | shadcn-style primitives + the shared streak renderer |
 | `components/home/` | hero, why-choose, plans-preview, shop-preview, cta-section, home-page | landing composition |
 | `components/memberships/` | memberships-page, membership-card | rail + cross-sell dialog + home plan card |
 | `components/shop/` | shop-page | toolbar + grid + product card |
 | `components/cart/` | cart-page | rows, steppers, summary, checkout |
 | `components/layout/` | header, footer, toaster | app chrome |
-| `components/auth/` | auth-form | login/signup card |
+| `components/auth/` | auth-form | the reference's login card (real logo asset, Alert errors, no auth redirect) |
+| `components/not-found-page.tsx` | — | the reference's branded 404 surface (served by `/signup` + unknown routes) |
 | `components/providers.tsx` | — | AppProvider (user + cart count + toasts) |
 
 **The golden rule:** client components never import `@/lib/db`; only route
@@ -324,6 +330,10 @@ is deliberately not cloned.
 | 13 | "Normalizing" capitalized routes | Breaks reference parity + e2e + links | Keep `/Home`, `/Memberships`, `/Shop`, `/Cart` |
 | 14 | Editing the speed-line/category specs without their tests | Silent parity drift | Update `.test.ts` in the same commit |
 | 15 | Importing `tw-animate-css` bare | Turbopack can't resolve its `style` export condition | Import `src/app/tw-animate-vendored.css` |
+| 16 | Upgrading lucide-react past 0.475.0 | 7 icons get redesigned geometry (bag, dumbbell, menu, logout…) → visual drift from the reference | Keep the exact pin; `tests/e2e/icons.spec.ts` guards it |
+| 17 | Deleting the `--font-sans` pin in `globals.css` | Tailwind ≥ 4.1's default stack changes body font metrics on every page | Keep the reference's `ui-sans-serif, system-ui, …` pin |
+| 18 | Reordering the seed's plan array or dropping the `createdAt` stagger | SQLite millisecond ties flip `createdAt desc` → home preview order drifts from [Family, Pro, Starter] | Keep creation order + hourly stagger |
+| 19 | "Fixing" `/signup` into a real signup form or redirecting authed `/login` | Breaks reference parity (its SPA serves 404 at /signup; it renders the login card when authed) | Keep `NotFoundPage` at signup; no redirect on login |
 
 ---
 
@@ -337,6 +347,9 @@ is deliberately not cloned.
 | E2E fails with SQLite error 14 | Standalone build lacks the traced `prisma/schema.prisma` | `bun run build` (script copies it); don't strip the copy steps |
 | E2E 429 on login | Per-test logins tripped the rate limiter | storageState project; keep real logins < 10/15 min |
 | Menu won't close after navigation | Effect-based close was refactored to something async | Render-time prev-pathname adjustment in `header.tsx` |
+| Icons look subtly "newer" than the reference | lucide-react drifted past 0.475.0 | `bun install` with the pin restored; check `tests/e2e/icons.spec.ts` path data |
+| Home preview cards in the wrong order | Seed `createdAt` values tied at the same millisecond | Re-seed (hourly stagger); verify `ORDER BY createdAt DESC` |
+| Login error text mismatch | API copy diverged from the reference's alert | The string is "Invalid email or password" — pinned by `auth.spec.ts` |
 | Toast text "wrong" | Copy is a parity contract | Exact strings live in the components + `CLAUDE.md` list |
 | Speed lines look stacked at top | (If ever) missing `top-[N%]` utilities | Verify `getComputedStyle(line).top`; specs in `speed-lines.ts` |
 | Dev server dies between shell commands (sandbox) | Process reaper kills tool-call children | Double-fork daemonize: `( ( exec setsid CMD > log 2>&1 < /dev/null ) & )` |
@@ -348,9 +361,9 @@ is deliberately not cloned.
 ```bash
 bun run lint          # clean
 bun run typecheck     # clean
-bun run test          # 36/36
+bun run test          # 40/40
 bun run build         # standalone compiles
-bun run test:e2e      # 43/43
+bun run test:e2e      # 57/57
 ```
 
 Then the human-pass list:
@@ -360,6 +373,10 @@ Then the human-pass list:
 - [ ] Memberships: Crown badge ≈65px from the card top; rail scrolls horizontally
 - [ ] Shop: toolbar sticks under the header on scroll; category dropdown is Title Case; filter actually filters
 - [ ] Cart: add → badge bumps + exact toast; checkout clears cart + success toast + redirect
+- [ ] Login: renders while authenticated; bad credentials → red Alert "Invalid email or password"; page title is the absolute "FitPro GYM App"
+- [ ] `/signup` shows the branded 404 (HTTP 200); unknown route → 404 page + HTTP 404
+- [ ] Home plan preview: Family Pack → Pro Athlete → Starter (newest-first by createdAt)
+- [ ] lucide-react still pinned at 0.475.0 (icon paths unchanged)
 - [ ] `.env` never committed with secrets (the committed one is template-only); `db/*.db` and `tests/e2e/.auth/` are git-ignored
 
 ---

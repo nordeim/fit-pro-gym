@@ -18,8 +18,10 @@ export const dynamic = "force-dynamic";
 export async function HomePage() {
   const [membershipRows, productRows] = await Promise.all([
     prisma.membershipPlan.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-      take: 6,
+      // Reference parity: Membership.list("-created_date", 3) — the three
+      // NEWEST plans in creation-descending order, no positional pinning.
+      orderBy: { createdAt: "desc" },
+      take: 3,
     }),
     prisma.product.findMany({
       where: { featured: true },

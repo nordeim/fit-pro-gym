@@ -1,13 +1,11 @@
-import { redirect } from "next/navigation";
-
 import { AuthForm } from "@/components/auth/auth-form";
-import { getSessionUser } from "@/lib/auth";
 
-export const metadata = { title: "Sign in" };
+// Plain app title (absolute — escapes the root layout's "%s | …" template,
+// matching the reference, whose /login title is just "FitPro GYM App").
+export const metadata = { title: { absolute: "FitPro GYM App" } };
 
-export default async function LoginPage() {
-  // Authenticated visits skip the login screen (reference parity).
-  const user = await getSessionUser();
-  if (user) redirect("/Home");
-  return <AuthForm mode="signin" />;
+// The reference renders the login form for authenticated visitors too —
+// no redirect to /Home.
+export default function LoginPage() {
+  return <AuthForm />;
 }

@@ -39,6 +39,17 @@ test.describe("memberships route", () => {
     await expect(proCard.getByText("Most Popular")).toBeVisible();
   });
 
+  test("Choose buttons carry the reference's shopping-cart icon", async ({ page }) => {
+    // The reference's rail buttons render a lucide shopping-cart icon
+    // (w-5 h-5, mr-2) before the "Choose …" label.
+    const buttons = page.locator("main button").filter({ hasText: /^Choose / });
+    await expect(buttons).toHaveCount(4, { timeout: 15_000 });
+    const icon = buttons.first().locator("svg.lucide-shopping-cart");
+    await expect(icon).toHaveCount(1);
+    await expect(icon).toHaveClass(/h-5/);
+    await expect(icon).toHaveClass(/mr-2/);
+  });
+
   test("choosing a plan adds it to the cart and opens the cross-sell dialog", async ({
     page,
   }) => {

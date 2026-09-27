@@ -31,6 +31,10 @@ async function main() {
   });
 
   // ---- Membership plans (reference "Membership" entities) ------------------
+  // Creation order matters for reference parity: the reference's entities
+  // were created Basic Fit -> Starter -> Pro Athlete -> Family Pack, and its
+  // home preview renders Membership.list("-created_date", 3) — i.e. the
+  // three NEWEST plans: [Family Pack, Pro Athlete, Starter]. Keep this order.
   const plans: Array<{
     name: string;
     description: string;
@@ -41,6 +45,29 @@ async function main() {
     colorScheme: string;
     sortOrder: number;
   }> = [
+    {
+      name: "Basic Fit",
+      description: "Perfect for getting started on your fitness journey",
+      price: 39,
+      durationMonths: 12,
+      features: [
+        "Access to gym equipment",
+        "Locker room facilities",
+        "Basic fitness assessment",
+        "Mobile app access",
+      ],
+      colorScheme: "blue",
+      sortOrder: 2,
+    },
+    {
+      name: "Starter",
+      description: "Perfect for beginners to get started on their fitness journey.",
+      price: 29,
+      durationMonths: 1,
+      features: ["Basic gym access", "Locker room access", "1 free group class"],
+      colorScheme: "orange",
+      sortOrder: 4,
+    },
     {
       name: "Pro Athlete",
       description: "Comprehensive training for serious fitness enthusiasts",
@@ -59,20 +86,6 @@ async function main() {
       sortOrder: 1,
     },
     {
-      name: "Basic Fit",
-      description: "Perfect for getting started on your fitness journey",
-      price: 39,
-      durationMonths: 12,
-      features: [
-        "Access to gym equipment",
-        "Locker room facilities",
-        "Basic fitness assessment",
-        "Mobile app access",
-      ],
-      colorScheme: "blue",
-      sortOrder: 2,
-    },
-    {
       name: "Family Pack",
       description: "Get the whole family fit! Access for up to 4 members.",
       price: 149,
@@ -87,20 +100,16 @@ async function main() {
       colorScheme: "purple",
       sortOrder: 3,
     },
-    {
-      name: "Starter",
-      description: "Perfect for beginners to get started on their fitness journey.",
-      price: 29,
-      durationMonths: 1,
-      features: ["Basic gym access", "Locker room access", "1 free group class"],
-      colorScheme: "orange",
-      sortOrder: 4,
-    },
   ];
 
-  for (const plan of plans) {
+  // Deterministic creation dates (staggered one hour apart): createdAt drives
+  // the home preview's "-created_date" ordering, and SQLite timestamps share
+  // milliseconds when rows insert back-to-back — ties flip the order. The
+  // stagger pins [Family Pack, Pro Athlete, Starter] for the preview.
+  const planCreated = (i: number) => new Date(Date.now() - (plans.length - 1 - i) * 3_600_000);
+  for (const [i, plan] of plans.entries()) {
     await db.membershipPlan.create({
-      data: { ...plan, features: JSON.stringify(plan.features) },
+      data: { ...plan, features: JSON.stringify(plan.features), createdAt: planCreated(i) },
     });
   }
 

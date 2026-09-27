@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Dumbbell, Lock, Mail } from "lucide-react";
+import { Lock, Mail } from "lucide-react";
 
 import { useApp } from "@/components/providers";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,47 +36,45 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 /**
- * Auth surface, mirroring the reference's light login card: circular logo
- * chip, "Continue with Google", OR divider, icon inputs, dark submit.
- * Used by both /login (signIn) and /signup (create account).
+ * Auth surface, mirroring the reference's login card 1:1 (DOM extracted
+ * from the live app): the gradient slate canvas, the real logo image in a
+ * ring chip, "Continue with Google" with the -ml-4 icon wrapper, the
+ * uppercase OR divider, slate icon inputs, the dark slate-900 submit, and
+ * the bottom "Forgot password? / Need an account? Sign up" row — both
+ * plain grey buttons, inert exactly like the reference's. Errors render in
+ * the reference's red Alert box ("Invalid email or password").
+ *
+ * The reference has no signup page (its /signup route renders the 404), so
+ * this form is sign-in only; /api/auth/register remains as an API surface.
  */
-export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
+export function AuthForm() {
   const router = useRouter();
   const { refreshUser, refreshCart, showToast } = useApp();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [name, setName] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
-
-  const isSignup = mode === "signup";
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
     try {
-      const endpoint = isSignup ? "/api/auth/register" : "/api/auth/login";
-      const body = isSignup ? { name, email, password } : { email, password };
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
-        user?: { email: string; name: string };
       };
       if (!res.ok) {
-        setError(
-          data.error ??
-            (isSignup ? "Could not create your account" : "Incorrect email or password")
-        );
+        setError(data.error ?? "Invalid email or password");
         return;
       }
       await refreshUser();
       await refreshCart();
-      showToast("success", isSignup ? "Welcome to FitnessPro!" : "Signed in successfully");
+      showToast("success", "Signed in successfully");
       router.push("/Home");
     } catch {
       setError("Something went wrong. Please try again.");
@@ -93,172 +91,150 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-12">
+    <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 p-8 shadow-2xl backdrop-blur-sm sm:p-10">
-          {/* Logo chip — a span (the reference's circular chip mark) */}
-          <div className="mb-8 flex justify-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-4 ring-white/50 shadow-lg">
-              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-green-500">
-                <Dumbbell className="h-6 w-6 text-white" aria-hidden />
-              </span>
-            </span>
-          </div>
-
-          <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Welcome to FitPro GYM App
-            </h1>
-            <p className="mt-2 text-sm text-gray-500">
-              {isSignup ? "Create your account to get started" : "Sign in to continue"}
-            </p>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onGoogle}
-            className="mb-6 flex w-full items-center justify-center gap-3 rounded-xl border-slate-200 bg-white px-5 py-3.5 text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
-          >
-            <GoogleIcon className="h-4 w-4" />
-            Continue with Google
-          </Button>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center" aria-hidden>
-              <span className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-400 uppercase">or</span>
-            </div>
-          </div>
-
-          <form onSubmit={onSubmit} className="space-y-4">
-            {isSignup ? (
-              <div className="space-y-1.5">
-                <Label htmlFor="name" className="text-slate-700">
-                  Full Name
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
-                    required
-                    autoComplete="name"
-                    className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 text-slate-900 placeholder:text-slate-500 focus:border-slate-400 sm:h-12"
+        <div className="text-card-foreground relative overflow-hidden rounded-2xl border-0 bg-white/95 shadow-2xl backdrop-blur-sm">
+          <div className="p-8 sm:p-10 md:px-10 md:pt-12 md:pb-10">
+            <div className="flex flex-col items-center space-y-6 text-center sm:space-y-8">
+              {/* Logo — the reference's image in the ring chip with glow blob */}
+              <div className="group relative">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 opacity-30 blur-xl transition-opacity duration-300 group-hover:opacity-40" />
+                <span className="relative flex h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-lg ring-4 ring-white/50 transition-all duration-300 group-hover:shadow-xl sm:h-24 sm:w-24">
+                  <img
+                    className="aspect-square h-full w-full object-cover"
+                    alt="FitPro GYM App logo"
+                    src="/login-logo.png"
                   />
-                  <Dumbbell
-                    className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400"
-                    aria-hidden
-                  />
-                </div>
+                </span>
               </div>
-            ) : null}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-slate-700">
-                Email
-              </Label>
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                  className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 text-slate-900 placeholder:text-slate-600 focus:border-slate-400 sm:h-12"
-                />
-                <Mail
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
-                  aria-hidden
-                />
+              <div className="space-y-2 sm:space-y-3">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  Welcome to FitPro GYM App
+                </h1>
+                <p className="text-sm font-medium text-slate-500 sm:text-base">
+                  Sign in to continue
+                </p>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-slate-700">
-                  Password
-                </Label>
-                {!isSignup ? (
+              <div className="w-full">
+                <div className="space-y-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      showToast(
-                        "info",
-                        "Password reset is not available in this environment."
-                      )
-                    }
-                    className="text-xs text-blue-600 hover:underline"
+                    onClick={onGoogle}
+                    className="group flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-[16px] font-medium text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
                   >
-                    Forgot password?
+                    <div className="-ml-4 transition-transform duration-200">
+                      <GoogleIcon className="h-5 w-5" />
+                    </div>
+                    <span>Continue with Google</span>
                   </button>
-                ) : null}
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={8}
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                  className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 text-slate-900 placeholder:text-slate-600 focus:border-slate-400 sm:h-12"
-                />
-                <Lock
-                  className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
-                  aria-hidden
-                />
+                </div>
+
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center" aria-hidden>
+                    <div className="h-[1px] w-full shrink-0 bg-slate-200" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-3 font-medium tracking-wider text-slate-500">
+                      or
+                    </span>
+                  </div>
+                </div>
+
+                <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="email" className="text-slate-700">
+                        Email
+                      </Label>
+                      <div className="relative">
+                        <Mail
+                          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
+                          aria-hidden
+                        />
+                        <Input
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          required
+                          autoComplete="email"
+                          className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus:ring-slate-400 sm:h-12"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="password" className="text-slate-700">
+                        Password
+                      </Label>
+                      <div className="relative">
+                        <Lock
+                          className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
+                          aria-hidden
+                        />
+                        <Input
+                          id="password"
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          required
+                          minLength={8}
+                          autoComplete="current-password"
+                          className="h-11 rounded-xl border-slate-200 bg-slate-50/50 pl-10 placeholder:text-slate-600 focus:border-slate-400 focus:ring-slate-400 sm:h-12"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {error ? (
+                    <Alert className="rounded-xl border-red-200 bg-red-50/70">
+                      <div className="[&_p]:leading-relaxed text-sm text-red-700">
+                        {error}
+                      </div>
+                    </Alert>
+                  ) : null}
+
+                  <div className="space-y-3">
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="h-11 w-full rounded-xl bg-slate-900 font-medium text-white shadow-sm transition-all duration-200 hover:bg-slate-800 sm:h-12"
+                    >
+                      {submitting ? "Signing in..." : "Sign in"}
+                    </Button>
+                    <div className="flex flex-col items-center justify-between gap-2 sm:flex-row sm:gap-0">
+                      {/* Inert on the reference — mirrored. */}
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-700"
+                      >
+                        Forgot password?
+                      </button>
+                      {/* Inert on the reference (its /signup is a 404) — mirrored. */}
+                      <button
+                        type="button"
+                        className="text-sm text-slate-500 transition-colors hover:text-slate-700"
+                      >
+                        Need an account?{" "}
+                        <span className="font-medium text-slate-700">Sign up</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
             </div>
-
-            {error ? (
-              <p
-                role="alert"
-                className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
-              >
-                {error}
-              </p>
-            ) : null}
-
-            <Button
-              type="submit"
-              disabled={submitting}
-              className="h-11 w-full rounded-xl bg-gray-900 text-white hover:bg-gray-800 sm:h-12"
-            >
-              {submitting
-                ? isSignup
-                  ? "Creating account..."
-                  : "Signing in..."
-                : isSignup
-                  ? "Create Account"
-                  : "Sign in"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-500">
-            {isSignup ? "Already have an account? " : "Need an account? "}
-            <Link
-              href={isSignup ? "/login" : "/signup"}
-              className="font-medium text-blue-600 hover:underline"
-            >
-              {isSignup ? "Sign in" : "Sign up"}
-            </Link>
-          </p>
+          </div>
         </div>
       </motion.div>
-    </div>
+    </main>
   );
 }

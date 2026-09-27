@@ -110,6 +110,26 @@ test.describe("plans preview + shop preview (reference parity)", () => {
     await expect(pill).toHaveClass(/to-green-500/);
   });
 
+  test("plans preview renders the three NEWEST plans, creation-desc (no pinning)", async ({
+    page,
+  }) => {
+    // Reference: Membership.list("-created_date", 3) over entities created
+    // Basic Fit -> Starter -> Pro Athlete -> Family Pack yields
+    // [Family Pack, Pro Athlete, Starter] — popular rides its own flag.
+    const section = page.locator('section:has(h2:has-text("Choose Your Perfect Plan"))');
+    const cards = section.locator("h3");
+    await expect(cards).toHaveCount(3, { timeout: 15_000 });
+    await expect(cards.nth(0)).toHaveText("Family Pack");
+    await expect(cards.nth(1)).toHaveText("Pro Athlete");
+    await expect(cards.nth(2)).toHaveText("Starter");
+    // The popular badge is on Pro Athlete (the plan's flag), not a slot.
+    const proCard = section
+      .locator("div")
+      .filter({ has: page.getByRole("heading", { name: "Pro Athlete", exact: true }) })
+      .first();
+    await expect(proCard.getByText("Most Popular")).toBeVisible();
+  });
+
   test("shop preview: to-black canvas, premium badge, gradient heading", async ({ page }) => {
     const section = page.locator('section:has(h2:has-text("Professional Fitness Gear"))');
     await expect(section).toHaveClass(/bg-gradient-to-b/);

@@ -1,12 +1,11 @@
-import { redirect } from "next/navigation";
+import { NotFoundPage } from "@/components/not-found-page";
 
-import { AuthForm } from "@/components/auth/auth-form";
-import { getSessionUser } from "@/lib/auth";
+export const metadata = { title: "Signup" };
 
-export const metadata = { title: "Create account" };
-
-export default async function SignupPage() {
-  const user = await getSessionUser();
-  if (user) redirect("/Home");
-  return <AuthForm mode="signup" />;
+// The reference never built a signup page — its /signup route renders the
+// app's 404 ("The page \"signup\" could not be found in this application.")
+// while keeping the route's own title. Mirrored here: the page serves HTTP
+// 200 with the 404 content, exactly like the reference's SPA shell.
+export default function SignupPage() {
+  return <NotFoundPage pageName="signup" />;
 }

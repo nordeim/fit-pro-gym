@@ -10,7 +10,7 @@ Guidance for Claude Code when working in this repository. Read `AGENTS.md` for t
 
 **Runtime:** Bun is the documented runtime (`bun run dev|build|start`, `bun prisma/seed.ts`); npm/npx fallbacks exist in scripts. Node ≥ 20 works for everything except the seed's `bun` shorthand (use `bunx tsx prisma/seed.ts`).
 
-**Demo identity:** `demo@fitpro.app` / `Demo1234!` (seeded). Routes are capitalized for reference parity: `/Home`, `/Memberships`, `/Shop`, `/Cart`; `/` ≡ `/Home`; `/login`, `/signup` lowercase.
+**Demo identity:** `demo@fitpro.app` / `Demo1234!` (seeded). Routes are capitalized for reference parity: `/Home`, `/Memberships`, `/Shop`, `/Cart`; `/` ≡ `/Home`; `/login` lowercase. The reference never built a signup page — `/signup` deliberately renders the branded 404 (HTTP 200, reference SPA behavior); `/api/auth/register` is the only signup path.
 
 ## The Meticulous Approach (workflow contract)
 
@@ -53,18 +53,21 @@ Guidance for Claude Code when working in this repository. Read `AGENTS.md` for t
 - Sessions are HMAC-SHA256 signed cookies (`fitpro_session`, base64url body + signature, 7-day expiry), `AUTH_SECRET` env (insecure dev fallback constant when unset — documented in `.env.example`).
 - Login/register are rate-limited per IP (10 fails / 15 min). Keep total real login attempts in any test run well under that.
 - `getSessionUser()` reads the cookie via `next/headers` — server components and route handlers only.
+- **`/login` renders for authenticated visitors (no redirect) — reference parity.** Login failures surface a red shadcn-style `Alert` ("Invalid email or password") above the form; the login page title is the absolute "FitPro GYM App". The login card uses the reference's real 480×480 logo asset (`public/login-logo.png`).
 
 ### UI / UX parity
 
-- The header, footer, hero, plan cards, product cards, cart rows, checkout form, and login card are **pixel-matched to the reference** (markup classes were extracted from the live app's bundle). Changes to these files should preserve the extracted classnames or have an explicit reason.
+- The header, footer, hero, plan cards, product cards, cart rows, checkout form, login card, and branded 404 are **pixel-matched to the reference** (markup classes were extracted from the live app's DOM/bundle). Changes to these files should preserve the extracted classnames or have an explicit reason.
 - framer-motion entrance/hover animations mirror the reference (staggered `delay: index * 0.1`, `whileHover: { y: -12 }`, 8 speed lines per hero with the exact durations/delays in `src/lib/speed-lines.ts`). `useReducedMotion` guards exist — keep them.
-- Icons: lucide-react, matched 1:1 to the reference (Home=House, Memberships=CreditCard, Shop=ShoppingBag, cart=ShoppingCart, logo=Dumbbell, features=Check, popular=Star on the HOME plan card, popular=Crown on the MEMBERSHIPS rail card, why-choose stats=Users/Award/Zap/Star).
+- Icons: **lucide-react pinned at exactly 0.475.0** (the reference's build version — 0.5xx redesigns ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users). Geometry is pinned by `tests/e2e/icons.spec.ts`. Icons matched 1:1 to the reference: Home=House, Memberships=CreditCard, Shop=ShoppingBag, cart=ShoppingCart, logo=Dumbbell, features=Check, popular=Star on the HOME plan card, popular=Crown on the MEMBERSHIPS rail card, why-choose stats=Users/Award/Zap/Star, memberships Choose buttons include a ShoppingCart.
+- Fonts: the reference's `--font-sans` (`ui-sans-serif, system-ui, …` — Tailwind v4's early default) is pinned in `src/app/globals.css`; Tailwind ≥ 4.1 ships a different v3-style stack.
+- Home plan preview renders the reference's query — the three newest plans by `createdAt` desc (seed order + hourly `createdAt` stagger make this deterministic).
 - Images: the reference's Unsplash URLs are part of the seed data. Use `<img>` (not next/image) for parity with the reference — the repo's ESLint does not flag it.
 
 ## Testing
 
-- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts` (36 specs: db-path, speed-lines, shop-categories, money, serializers). Run: `bun run test`.
-- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `home` (reference-parity surfaces), `shop`, `memberships`, `cart` — 43 specs total.
+- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts` (40 specs: db-path, speed-lines, shop-categories, not-found-name, money, serializers). Run: `bun run test`.
+- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `home` (reference-parity surfaces), `icons` (SVG path-geometry pins), `not-found`, `shop`, `memberships`, `cart` — 57 specs total.
 - **Always test through the API when arranging state** in specs (`page.request.get/post/delete`) — the UI flow is the thing under test.
 - New e2e specs join the main project and inherit the authenticated storageState; only `auth.spec.ts` opts out.
 

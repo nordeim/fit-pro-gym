@@ -80,6 +80,13 @@
 }
 
 @theme inline {
+  /* The reference's sans stack — Tailwind v4's early default (later v4
+     releases ship the v3-style -apple-system stack instead; the reference
+     app was built with the ui-sans-serif one, pinned here for parity). */
+  --font-sans:
+    ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
