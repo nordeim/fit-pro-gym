@@ -110,24 +110,52 @@ test.describe("plans preview + shop preview (reference parity)", () => {
     await expect(pill).toHaveClass(/to-green-500/);
   });
 
-  test("plans preview renders the three NEWEST plans, creation-desc (no pinning)", async ({
+  test("plans preview renders [newest, HARDCODED Pro, second-newest] (reference bundle algorithm)", async ({
     page,
   }) => {
     // Reference: Membership.list("-created_date", 3) over entities created
-    // Basic Fit -> Starter -> Pro Athlete -> Family Pack yields
-    // [Family Pack, Pro Athlete, Starter] — popular rides its own flag.
+    // Basic Fit + Pro Athlete (2025-07-01) then Starter + Family Pack
+    // (2025-07-30) yields e = [Family Pack, Starter, Pro Athlete]; its
+    // bundle then renders [e[0], HARDCODED-Pro, e[1]] — the third fetched
+    // entity is discarded and the middle card is NOT the entity's data.
     const section = page.locator('section:has(h2:has-text("Choose Your Perfect Plan"))');
     const cards = section.locator("h3");
     await expect(cards).toHaveCount(3, { timeout: 15_000 });
     await expect(cards.nth(0)).toHaveText("Family Pack");
     await expect(cards.nth(1)).toHaveText("Pro Athlete");
     await expect(cards.nth(2)).toHaveText("Starter");
-    // The popular badge is on Pro Athlete (the plan's flag), not a slot.
+    // The popular badge rides the hardcoded card's own flag.
+    // (Scope to the card element itself — the plan-card root carries
+    // bg-slate-800/70; a loose div.filter would match the wrapping grid.)
     const proCard = section
-      .locator("div")
-      .filter({ has: page.getByRole("heading", { name: "Pro Athlete", exact: true }) })
-      .first();
+      .locator('div[class*="bg-slate-800/70"]')
+      .filter({ has: page.getByRole("heading", { name: "Pro Athlete", exact: true }) });
+    await expect(proCard).toHaveCount(1);
     await expect(proCard.getByText("Most Popular")).toBeVisible();
+    // The hardcoded card lists the reference's FIVE design features —
+    // including "Premium equipment access" — and NOT the entity's six
+    // (no "Recovery room access", no "Mobile app with workout plans").
+    await expect(proCard.locator("li")).toHaveCount(5);
+    await expect(proCard.getByText("Premium equipment access")).toBeVisible();
+    await expect(proCard.getByText("Recovery room access")).toHaveCount(0);
+    await expect(proCard.getByText("Mobile app with workout plans")).toHaveCount(0);
+  });
+
+  test("shop preview renders the four NEWEST featured products, creation-desc", async ({
+    page,
+  }) => {
+    // Reference: Product?featured=true&sort=-created_date&limit=4 — with its
+    // four original featured products tied, its backend tie order is
+    // [Pre-Workout, Yoga Mat, Dumbbells, Whey] (newest first). The seed
+    // staggers createdAt in that order (the injected XSS junk row on the
+    // reference is deliberately not part of this clone's catalog).
+    const section = page.locator('section:has(h2:has-text("Professional Fitness Gear"))');
+    const names = section.locator("h3");
+    await expect(names).toHaveCount(4, { timeout: 15_000 });
+    await expect(names.nth(0)).toHaveText("Pre-Workout Energy");
+    await expect(names.nth(1)).toHaveText("Yoga Mat Premium");
+    await expect(names.nth(2)).toHaveText("Professional Dumbbells Set");
+    await expect(names.nth(3)).toHaveText("Whey Protein Powder");
   });
 
   test("shop preview: to-black canvas, premium badge, gradient heading", async ({ page }) => {

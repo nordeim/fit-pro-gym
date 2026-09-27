@@ -10,8 +10,9 @@
 
 ---
 
-#### Revision Block — v1.2
+#### Revision Block — v1.3
 
+- `[v1.3]` Session-5 parity remediation (target re-audit; 3 root defects, TDD-executed): the home plan preview now mirrors the reference's BUNDLE ALGORITHM — it renders `[newest, HARDCODED-Pro, second-newest]` over `Membership.list("-created_date", 3)` (the middle card is a hardcoded Pro Athlete with FIVE design features incl. "Premium equipment access", NOT the entity's six-feature row; the third fetched entity is discarded) — extracted verbatim from the reference's JS bundle into `src/lib/home-featured-plan.ts` (unit-pinned + e2e-pinned); seed creation dates now mirror the reference's REAL entity dates (fetched live: Basic Fit + Pro Athlete 2025-07-01, Starter + Family Pack 2025-07-30 — two tie groups broken by the reference's own rendered order, so `-created_date` desc = [Family Pack, Starter, Pro Athlete, Basic Fit]); product seed gained a 200ms `createdAt` stagger anchoring the reference's featured tie order [Pre-Workout, Yoga Mat, Dumbbells, Whey] (featured preview `limit=4` and cross-sell `limit=3` queries were already `createdAt desc` — the stagger makes them deterministic). Tests: 47 unit + 58 e2e.
 - `[v1.2]` Session-3 parity remediation (9 root defects, TDD-executed): lucide-react repinned from ^0.525.0 to **0.475.0** — the reference bundle's exact version (0.5xx redesigned ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users; geometry now pinned by `tests/e2e/icons.spec.ts`); login card rebuilt to the reference's DOM (real 480×480 logo asset `public/login-logo.png`, Google button, OR divider, header structure, red Alert error "Invalid email or password" with matching API copy, absolute page title "FitPro GYM App"); `/login` no longer redirects authenticated visitors (reference renders the form); `/signup` now renders the reference's branded 404 (its SPA shell serves HTTP 200 with 404 content — the reference never built a signup page); app-wide 404 page (`src/app/not-found.tsx` + `src/lib/not-found-name.ts`, unit-pinned); Memberships Choose buttons gained the reference's ShoppingCart icon; Cart title → "Cart"; `--font-sans` pinned to the reference's `ui-sans-serif, system-ui…` stack (Tailwind ≥ 4.1 ships a v3-style default); home plan preview now runs the reference's query (three newest plans by `createdAt` desc — seed reordered + hourly `createdAt` stagger for determinism). Tests: 40 unit + 57 e2e (16 home parity + 5 icon-geometry/404 pins).
 - `[v1.1]` Session-2 parity remediation: hero/memberships speed lines corrected to the reference's 8-line spec (extracted from the live DOM + bundle, pinned by `src/lib/speed-lines.test.ts`); hero gradient canvas + scrim/tint layers; Why-Choose rebuilt (glass cards, users/award/zap/star, scale-in values); Memberships rail badge → Crown at the reference's top-6+mt-10 offset; Shop toolbar → sticky card + 4-col grid + hardcoded Title Case categories (`src/lib/shop-categories.ts`); header logout buttons → `text-xs`; login card/Google button polish; broken Kettlebell seed image replaced; `NEXT_PUBLIC_SITE_URL` wired to `metadataBase`. Tests: 36 unit + 43 e2e (15 new home reference-parity specs).
 - `[CA]` Initial PAD for the completed clone: full recon → implementation → test → documentation cycle.
@@ -276,10 +277,11 @@ fit-pro-gym/
 │   │   ├── auth.ts            # scrypt · HMAC sessions · rate limiter
 │   │   ├── serialize.ts       # the ONLY JSON-field parser; row → DTO
 │   │   ├── not-found-name.ts  # pathname → quoted 404 page name (4 unit specs)
+│   │   ├── home-featured-plan.ts  # the reference's hardcoded home middle card + slot algorithm (7 unit specs)
 │   │   └── utils.ts           # cn · cartTotal (cents) · formatPrice · toOrderLine
 │   └── hooks/                 # (reserved)
 ├── tests/
-│   ├── e2e/                   # global-setup · auth.setup · helpers · 8 spec files (57 specs)
+│   ├── e2e/                   # global-setup · auth.setup · helpers · 8 spec files (58 specs)
 │   └── db-path.test.ts        # resolution contract
 ├── docs/
 │   ├── screenshots/           # current UI captures (desktop + mobile)
@@ -394,10 +396,10 @@ All endpoints return JSON. Mutations require the `fitpro_session` HttpOnly cooki
 
 | Layer | Runner | Scope | Entry |
 |-------|--------|-------|-------|
-| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 40 specs (db-path 15 · speed-lines 7 · shop-categories 4 · not-found-name 4 · money+serializers 10) | `bun run test` |
+| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 47 specs (db-path 15 · speed-lines 7 · shop-categories 4 · not-found-name 4 · home-featured-plan 7 · money+serializers 10) | `bun run test` |
 | Type | `tsc --noEmit` | whole repo | `bun run typecheck` |
 | Lint | ESLint 9 flat config | whole repo (incl. `react-hooks/set-state-in-effect`) | `bun run lint` |
-| E2E | Playwright | 57 specs: auth (8), mobile-navigation (9), home reference-parity (16), icon-geometry (2), not-found (3), shop (6), memberships (6), cart (6) + setup | `bun run build && bun run test:e2e` |
+| E2E | Playwright | 58 specs: auth (8), mobile-navigation (9), home reference-parity (17), icon-geometry (2), not-found (3), shop (6), memberships (6), cart (6) + setup | `bun run build && bun run test:e2e` |
 
 **E2E harness specifics (deliberate):**
 - Boots the **production standalone** build (`bun .next/standalone/server.js`) on :3100 — testing what ships.
@@ -486,5 +488,6 @@ What was measured from the reference (DOM snapshots, computed styles, network tr
 | Footer | 4-column grid, gradient logo, Quick Links/Support/Hours, © 2024 line |
 | Tokens | `--gym-primary:#0ea5e9` · `--gym-secondary:#10b981` · `--gym-dark:#1f2937` · `--gym-accent:#f59e0b` + stock shadcn HSL set · `--font-sans: ui-sans-serif, system-ui…` (reference's stack) |
 | Icons | lucide-react **0.475.0** (the reference bundle's exact version) — ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users geometry pinned by `tests/e2e/icons.spec.ts` |
-| Home preview | `Membership.list("-created_date", 3)` semantics — three newest plans by `createdAt` desc: Family Pack → Pro Athlete → Starter; popular badge renders wherever the flagged plan lands |
+| Home preview | `Membership.list("-created_date", 3)` + the bundle's `[e[0], HARDCODED-Pro, e[1]]` slot algorithm (`src/lib/home-featured-plan.ts`): Family Pack → hardcoded Pro Athlete (5 design features incl. "Premium equipment access", blue/star) → Starter; the third fetched entity is discarded. Seed mirrors the reference's real entity dates (two tie groups: 2025-07-01 / 2025-07-30) |
+| Home shop preview / cross-sell | `Product?featured=true&sort=-created_date` with the reference's tie order [Pre-Workout, Yoga Mat, Dumbbells, Whey] pinned by a 200ms seed stagger (preview take 4, cross-sell take 3) |
 | Domain | base44 entities → Prisma models, order item shape, dedupe semantics, pending status |

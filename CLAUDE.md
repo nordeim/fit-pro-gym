@@ -61,13 +61,13 @@ Guidance for Claude Code when working in this repository. Read `AGENTS.md` for t
 - framer-motion entrance/hover animations mirror the reference (staggered `delay: index * 0.1`, `whileHover: { y: -12 }`, 8 speed lines per hero with the exact durations/delays in `src/lib/speed-lines.ts`). `useReducedMotion` guards exist — keep them.
 - Icons: **lucide-react pinned at exactly 0.475.0** (the reference's build version — 0.5xx redesigns ShoppingBag/Dumbbell/Menu/LogOut/Mail/Search/Users). Geometry is pinned by `tests/e2e/icons.spec.ts`. Icons matched 1:1 to the reference: Home=House, Memberships=CreditCard, Shop=ShoppingBag, cart=ShoppingCart, logo=Dumbbell, features=Check, popular=Star on the HOME plan card, popular=Crown on the MEMBERSHIPS rail card, why-choose stats=Users/Award/Zap/Star, memberships Choose buttons include a ShoppingCart.
 - Fonts: the reference's `--font-sans` (`ui-sans-serif, system-ui, …` — Tailwind v4's early default) is pinned in `src/app/globals.css`; Tailwind ≥ 4.1 ships a different v3-style stack.
-- Home plan preview renders the reference's query — the three newest plans by `createdAt` desc (seed order + hourly `createdAt` stagger make this deterministic).
+- Home plan preview mirrors the reference's bundle algorithm — `[newest, HARDCODED-Pro, second-newest]` over the three newest plans (`src/lib/home-featured-plan.ts`, unit-pinned; the hardcoded card carries five design features incl. "Premium equipment access", NOT the entity's six). Featured-product surfaces (home preview `take 4`, cross-sell `take 3`) run `featured:true + createdAt desc` with the seed's 200ms stagger pinning [Pre-Workout, Yoga Mat, Dumbbells, Whey].
 - Images: the reference's Unsplash URLs are part of the seed data. Use `<img>` (not next/image) for parity with the reference — the repo's ESLint does not flag it.
 
 ## Testing
 
-- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts` (40 specs: db-path, speed-lines, shop-categories, not-found-name, money, serializers). Run: `bun run test`.
-- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `home` (reference-parity surfaces), `icons` (SVG path-geometry pins), `not-found`, `shop`, `memberships`, `cart` — 57 specs total.
+- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts` (47 specs: db-path, speed-lines, shop-categories, not-found-name, home-featured-plan, money, serializers). Run: `bun run test`.
+- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `home` (reference-parity surfaces incl. the hardcoded preview card + featured order), `icons` (SVG path-geometry pins), `not-found`, `shop`, `memberships`, `cart` — 58 specs total.
 - **Always test through the API when arranging state** in specs (`page.request.get/post/delete`) — the UI flow is the thing under test.
 - New e2e specs join the main project and inherit the authenticated storageState; only `auth.spec.ts` opts out.
 

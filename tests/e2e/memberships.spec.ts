@@ -73,6 +73,14 @@ test.describe("memberships route", () => {
     await expect(dialog.getByRole("button", { name: "Go to Cart" })).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Explore Full Store" })).toBeVisible();
 
+    // Cross-sell offers the THREE NEWEST featured products
+    // (reference query: Product?featured=true&sort=-created_date&limit=3)
+    const crossSellNames = dialog.locator("h3");
+    await expect(crossSellNames).toHaveCount(3, { timeout: 10_000 });
+    await expect(crossSellNames.nth(0)).toHaveText("Pre-Workout Energy");
+    await expect(crossSellNames.nth(1)).toHaveText("Yoga Mat Premium");
+    await expect(crossSellNames.nth(2)).toHaveText("Professional Dumbbells Set");
+
     // The plan landed in the cart (badge ≥ 1)
     const badge = page.locator("header span").filter({ hasText: /^\d+$/ });
     await expect(badge.first()).not.toHaveText("0");

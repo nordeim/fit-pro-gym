@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.2.0
+version: 1.3.0
 last_updated: 2026-09-27
-project_state: 40 unit tests + 57 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 3 — lucide pinned to 0.475.0, login/404/font/home-order parity)
+project_state: 47 unit tests + 58 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 5 — home preview hardcoded middle card, seed dates mirror the reference's real entity dates)
 tags:
   - nextjs
   - tailwind-v4
@@ -206,7 +206,7 @@ entrances, hover lifts, toasts) + vendored `tw-animate-*` utilities. A
 ```
 src/app/            routes (server components by default) + API handlers
 src/components/     ui/ (primitives) → feature folders (client islands)
-src/lib/            db, auth, serialize, utils, speed-lines, shop-categories
+src/lib/            db, auth, serialize, utils, speed-lines, shop-categories, not-found-name, home-featured-plan
 prisma/             schema + seed
 tests/              e2e specs + db-path contract
 ```
@@ -283,8 +283,8 @@ lists); parsing happens ONLY in `src/lib/serialize.ts`.
 | Entity | Rows | Notes |
 |--------|------|-------|
 | User | 1 | `demo@fitpro.app` / `Demo1234!` |
-| MembershipPlan | 4 | Starter $29 (orange), Basic Fit $39 (blue), Pro Athlete $59 (green, popular), Family Pack $149 (purple) |
-| Product | 8 | 4 featured + 4 non-featured; reference Unsplash URLs (all verified 200) |
+| MembershipPlan | 4 | Starter $29 (orange), Basic Fit $39 (blue), Pro Athlete $59 (green, popular — 6 features incl. Recovery room access), Family Pack $149 (purple). Fixed `PLAN_CREATED` dates mirror the reference's real entity dates (two tie groups: 2025-07-01 / 2025-07-30) |
+| Product | 8 | 4 featured + 4 non-featured; reference Unsplash URLs (all verified 200). 200ms `createdAt` stagger pins the featured `-created_date` order [Pre-Workout, Yoga Mat, Dumbbells, Whey] |
 
 Run: `DATABASE_URL="file:../db/custom.db" bun run db:seed` (the prefix guards
 against shell-env hijack). The reference's injected "XSS-INJECT-TEST" junk row
@@ -332,7 +332,7 @@ is deliberately not cloned.
 | 15 | Importing `tw-animate-css` bare | Turbopack can't resolve its `style` export condition | Import `src/app/tw-animate-vendored.css` |
 | 16 | Upgrading lucide-react past 0.475.0 | 7 icons get redesigned geometry (bag, dumbbell, menu, logout…) → visual drift from the reference | Keep the exact pin; `tests/e2e/icons.spec.ts` guards it |
 | 17 | Deleting the `--font-sans` pin in `globals.css` | Tailwind ≥ 4.1's default stack changes body font metrics on every page | Keep the reference's `ui-sans-serif, system-ui, …` pin |
-| 18 | Reordering the seed's plan array or dropping the `createdAt` stagger | SQLite millisecond ties flip `createdAt desc` → home preview order drifts from [Family, Pro, Starter] | Keep creation order + hourly stagger |
+| 18 | Reordering the seed's plan/product arrays or touching `PLAN_CREATED` / the product stagger | SQLite ties flip `createdAt desc` → preview/cross-sell order drifts; the home middle card's features converge with the entity's | Keep the arrays + fixed dates; the home-featured-plan tests pin the contract |
 | 19 | "Fixing" `/signup` into a real signup form or redirecting authed `/login` | Breaks reference parity (its SPA serves 404 at /signup; it renders the login card when authed) | Keep `NotFoundPage` at signup; no redirect on login |
 
 ---
@@ -348,7 +348,8 @@ is deliberately not cloned.
 | E2E 429 on login | Per-test logins tripped the rate limiter | storageState project; keep real logins < 10/15 min |
 | Menu won't close after navigation | Effect-based close was refactored to something async | Render-time prev-pathname adjustment in `header.tsx` |
 | Icons look subtly "newer" than the reference | lucide-react drifted past 0.475.0 | `bun install` with the pin restored; check `tests/e2e/icons.spec.ts` path data |
-| Home preview cards in the wrong order | Seed `createdAt` values tied at the same millisecond | Re-seed (hourly stagger); verify `ORDER BY createdAt DESC` |
+| Home preview cards in the wrong order | Seed `createdAt` values tied at the same millisecond | Re-seed (fixed dates); verify `ORDER BY createdAt DESC` |
+| Home Pro card shows six features / missing "Premium equipment access" | The preview is rendering the ENTITY row instead of the hardcoded card | `homePlanSlots` (src/lib/home-featured-plan.ts) replaces the middle slot — don't bypass it |
 | Login error text mismatch | API copy diverged from the reference's alert | The string is "Invalid email or password" — pinned by `auth.spec.ts` |
 | Toast text "wrong" | Copy is a parity contract | Exact strings live in the components + `CLAUDE.md` list |
 | Speed lines look stacked at top | (If ever) missing `top-[N%]` utilities | Verify `getComputedStyle(line).top`; specs in `speed-lines.ts` |
@@ -361,9 +362,9 @@ is deliberately not cloned.
 ```bash
 bun run lint          # clean
 bun run typecheck     # clean
-bun run test          # 40/40
+bun run test          # 47/47
 bun run build         # standalone compiles
-bun run test:e2e      # 57/57
+bun run test:e2e      # 58/58
 ```
 
 Then the human-pass list:
@@ -375,7 +376,8 @@ Then the human-pass list:
 - [ ] Cart: add → badge bumps + exact toast; checkout clears cart + success toast + redirect
 - [ ] Login: renders while authenticated; bad credentials → red Alert "Invalid email or password"; page title is the absolute "FitPro GYM App"
 - [ ] `/signup` shows the branded 404 (HTTP 200); unknown route → 404 page + HTTP 404
-- [ ] Home plan preview: Family Pack → Pro Athlete → Starter (newest-first by createdAt)
+- [ ] Home plan preview: Family Pack → HARDCODED Pro Athlete (5 features incl. "Premium equipment access") → Starter; the middle card ignores the entity row
+- [ ] Home shop preview: Pre-Workout → Yoga Mat → Dumbbells → Whey; cross-sell shows the first three of those
 - [ ] lucide-react still pinned at 0.475.0 (icon paths unchanged)
 - [ ] `.env` never committed with secrets (the committed one is template-only); `db/*.db` and `tests/e2e/.auth/` are git-ignored
 

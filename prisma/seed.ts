@@ -31,10 +31,15 @@ async function main() {
   });
 
   // ---- Membership plans (reference "Membership" entities) ------------------
-  // Creation order matters for reference parity: the reference's entities
-  // were created Basic Fit -> Starter -> Pro Athlete -> Family Pack, and its
-  // home preview renders Membership.list("-created_date", 3) — i.e. the
-  // three NEWEST plans: [Family Pack, Pro Athlete, Starter]. Keep this order.
+  // The reference's real entity dates (fetched live): two tie groups —
+  // Basic Fit + Pro Athlete share 2025-07-01T14:15:08.501Z and Starter +
+  // Family Pack share 2025-07-30T10:57:17.701Z. Its -created_date tie
+  // order descends [Family Pack, Starter, Pro Athlete, Basic Fit]; the
+  // millisecond offsets in PLAN_CREATED break the ties exactly that way,
+  // so Membership.list("-created_date", 3) = [Family Pack, Starter, Pro
+  // Athlete] and the home preview's hardcoded middle card replaces slot 3
+  // (see src/lib/home-featured-plan.ts). The array below is in creation
+  // (chronological) order and PLAN_CREATED matches it index-for-index.
   const plans: Array<{
     name: string;
     description: string;
@@ -60,15 +65,6 @@ async function main() {
       sortOrder: 2,
     },
     {
-      name: "Starter",
-      description: "Perfect for beginners to get started on their fitness journey.",
-      price: 29,
-      durationMonths: 1,
-      features: ["Basic gym access", "Locker room access", "1 free group class"],
-      colorScheme: "orange",
-      sortOrder: 4,
-    },
-    {
       name: "Pro Athlete",
       description: "Comprehensive training for serious fitness enthusiasts",
       price: 59,
@@ -84,6 +80,15 @@ async function main() {
       popular: true,
       colorScheme: "green",
       sortOrder: 1,
+    },
+    {
+      name: "Starter",
+      description: "Perfect for beginners to get started on their fitness journey.",
+      price: 29,
+      durationMonths: 1,
+      features: ["Basic gym access", "Locker room access", "1 free group class"],
+      colorScheme: "orange",
+      sortOrder: 4,
     },
     {
       name: "Family Pack",
@@ -102,14 +107,18 @@ async function main() {
     },
   ];
 
-  // Deterministic creation dates (staggered one hour apart): createdAt drives
-  // the home preview's "-created_date" ordering, and SQLite timestamps share
-  // milliseconds when rows insert back-to-back — ties flip the order. The
-  // stagger pins [Family Pack, Pro Athlete, Starter] for the preview.
-  const planCreated = (i: number) => new Date(Date.now() - (plans.length - 1 - i) * 3_600_000);
+  // Index-matched to the plans array (chronological). Fixed dates mirror the
+  // reference's own entities and make re-seeds fully deterministic — SQLite
+  // millisecond ties would otherwise flip "-created_date" ordering on rowid.
+  const PLAN_CREATED = [
+    new Date("2025-07-01T14:15:08.000Z"), // Basic Fit (tie group 2025-07-01)
+    new Date("2025-07-01T14:15:08.501Z"), // Pro Athlete (the reference's exact ms)
+    new Date("2025-07-30T10:57:17.000Z"), // Starter (tie group 2025-07-30)
+    new Date("2025-07-30T10:57:17.701Z"), // Family Pack (the reference's exact ms)
+  ];
   for (const [i, plan] of plans.entries()) {
     await db.membershipPlan.create({
-      data: { ...plan, features: JSON.stringify(plan.features), createdAt: planCreated(i) },
+      data: { ...plan, features: JSON.stringify(plan.features), createdAt: PLAN_CREATED[i] },
     });
   }
 
@@ -205,8 +214,17 @@ async function main() {
     },
   ];
 
-  for (const product of products) {
-    await db.product.create({ data: product });
+  // The reference's four original featured products share ONE timestamp
+  // (2025-07-01T14:15:08.553Z); its -created_date tie order renders
+  // [Pre-Workout, Yoga Mat, Dumbbells, Whey] — that is the exact order its
+  // featured preview (featured&-created_date&limit=4) and cross-sell
+  // (limit=3) render. The 200ms stagger below pins createdAt desc to the
+  // array order so SQLite ties can never flip it (the reference's injected
+  // "XSS-INJECT-TEST" junk row is deliberately absent from this seed).
+  const PRODUCT_ANCHOR = new Date("2025-07-01T14:15:08.553Z").getTime();
+  const productCreated = (i: number) => new Date(PRODUCT_ANCHOR - i * 200);
+  for (const [i, product] of products.entries()) {
+    await db.product.create({ data: { ...product, createdAt: productCreated(i) } });
   }
 
   console.log("Seeded FitPro demo data: 1 user, 4 membership plans, 8 products.");

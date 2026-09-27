@@ -19,11 +19,15 @@ export async function HomePage() {
   const [membershipRows, productRows] = await Promise.all([
     prisma.membershipPlan.findMany({
       // Reference parity: Membership.list("-created_date", 3) — the three
-      // NEWEST plans in creation-descending order, no positional pinning.
+      // NEWEST plans, creation-descending: [Family Pack, Starter, Pro
+      // Athlete]. PlansPreview then replaces the MIDDLE slot with the
+      // reference's hardcoded Pro Athlete card (its bundle does the same);
+      // the third fetched entity is never rendered.
       orderBy: { createdAt: "desc" },
       take: 3,
     }),
     prisma.product.findMany({
+      // Reference parity: Product?featured=true&sort=-created_date&limit=4.
       where: { featured: true },
       orderBy: { createdAt: "desc" },
       take: 4,

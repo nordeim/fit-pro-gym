@@ -8,16 +8,19 @@ import { ArrowRight } from "lucide-react";
 import type { MembershipDTO } from "@/components/providers";
 import { MembershipCard } from "@/components/memberships/membership-card";
 import { Button } from "@/components/ui/button";
+import { homePlanSlots } from "@/lib/home-featured-plan";
 
 /**
- * Home "Choose Your Perfect Plan" section. Mirrors the reference: the three
- * newest plans in creation-descending order (its query is
- * Membership.list("-created_date", 3) — no positional rearrangement), a
- * promo banner above, and a "View All Plans" CTA below. The "Most Popular"
- * badge renders from the plan's popular flag, wherever that plan lands.
+ * Home "Choose Your Perfect Plan" section. Mirrors the reference: its query
+ * is Membership.list("-created_date", 3) and its bundle then renders
+ * [newest, HARDCODED-Pro, second-newest] — the middle card is a hardcoded
+ * Pro Athlete (five design features, "Premium equipment access"), NOT the
+ * entity's row; the third fetched entity is never shown. The "Most
+ * Popular" badge rides the hardcoded card's own flag.
+ * See src/lib/home-featured-plan.ts (pinned by unit tests + e2e specs).
  */
 export function PlansPreview({ memberships }: { memberships: MembershipDTO[] }) {
-  const three: MembershipDTO[] = memberships;
+  const three: MembershipDTO[] = homePlanSlots(memberships);
 
   return (
     <section className="relative overflow-hidden bg-slate-900 py-20 text-white">

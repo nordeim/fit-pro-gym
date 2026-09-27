@@ -19,7 +19,7 @@ Compact instructions for AI coding agents working in this repository. Every line
 | Typecheck | `bun run typecheck` |
 | Lint | `bun run lint` |
 
-**Verification order: `lint → typecheck → test → build → test:e2e`.** All five are green as of the last commit (40 unit + 57 e2e, incl. 16 home reference-parity specs + 5 icon-geometry/404 pins).
+**Verification order: `lint → typecheck → test → build → test:e2e`.** All five are green as of the last commit (47 unit + 58 e2e, incl. 17 home reference-parity specs + 5 icon-geometry/404 pins).
 
 ## Critical gotchas
 
@@ -36,14 +36,14 @@ Compact instructions for AI coding agents working in this repository. Every line
 - **`/signup` deliberately renders the 404 page.** The reference never built a signup route — its SPA shell serves HTTP 200 with the branded 404 content ("The page \"signup\" could not be found in this application."). Mirrored via `src/app/signup/page.tsx` → `NotFoundPage`. Don't "fix" it into a real signup form. Genuinely unknown routes hit `src/app/not-found.tsx` (HTTP 404).
 - **`/login` renders for authenticated users — no redirect.** The reference shows its login card even when the session cookie is valid; the clone mirrors that. The signup flow lives at `/api/auth/register` only. Also: login failures surface a red shadcn-style **Alert** ("Invalid email or password") above the form, and the page title is the absolute "FitPro GYM App" (escapes the root `%s | …` template).
 - **The reference's font stack is pinned in `globals.css`.** `@theme inline { --font-sans: ui-sans-serif, system-ui, … }` — Tailwind v4's *early* default. Tailwind ≥ 4.1 ships a v3-style `-apple-system` stack; the reference was built with the `ui-sans-serif` one, so the token is pinned explicitly. Removing it changes body font metrics on every page.
-- **Home plan preview order comes from `createdAt`, not `sortOrder`.** The reference's query is `Membership.list("-created_date", 3)` — the three NEWEST plans, creation-descending: `[Family Pack, Pro Athlete, Starter]`. `prisma/seed.ts` creates plans in the reference's creation order AND staggers `createdAt` hourly (SQLite millisecond ties flip `desc` ordering — the stagger is the deterministic pin). Don't reorder the seed array or remove the stagger.
+- **Home plan preview order comes from `createdAt`, not `sortOrder` — and the middle card is HARDCODED.** The reference's query is `Membership.list("-created_date", 3)` over entities in two date groups (Basic Fit + Pro Athlete 2025-07-01, Starter + Family Pack 2025-07-30) → [Family Pack, Starter, Pro Athlete]; its bundle then renders `[e[0], HARDCODED-Pro, e[1]]` — the hardcoded card (5 design features incl. "Premium equipment access", blue, Star badge) replaces the entity row, and the third fetched entity is discarded. `src/lib/home-featured-plan.ts` holds both the card and the slot algorithm (unit-pinned). The seed's `PLAN_CREATED` fixed dates mirror the reference's real entity dates — don't reorder the array or touch the dates.
 
 ## Architecture map
 
 - `src/app/(app)/` — chrome layout (Header + Footer) over the four app pages; `src/app/login/` (reference login card, no chrome) + `src/app/signup/` (renders the branded 404) live outside it; `src/app/not-found.tsx` is the app-wide 404.
 - `src/app/api/` — 11 JSON endpoints. Cart/order mutations are owner-checked server-side; the client re-fetches after every mutation (`AppProvider.refreshCart`) — the server is the single source of truth, client state is only chrome.
 - `src/components/providers.tsx` — `AppProvider` (user, cart badge count, single-slot toast, 3s auto-dismiss), consumed via `useApp()`.
-- `src/lib/` — `db.ts` (Prisma singleton with resolved URL), `auth.ts` (scrypt + HMAC cookie + rate limiter), `serialize.ts` (DB row → API DTO, the ONLY place features JSON is parsed), `speed-lines.ts` (hero streak specs, test-pinned), `shop-categories.ts` (reference's hardcoded filter list, test-pinned), `not-found-name.ts` (pathname → quoted 404 page name, test-pinned), `utils.ts` (`cartTotal` is float-safe via integer cents — unit-tested; don't replace with naive reduce).
+- `src/lib/` — `db.ts` (Prisma singleton with resolved URL), `auth.ts` (scrypt + HMAC cookie + rate limiter), `serialize.ts` (DB row → API DTO, the ONLY place features JSON is parsed), `speed-lines.ts` (hero streak specs, test-pinned), `shop-categories.ts` (reference's hardcoded filter list, test-pinned), `not-found-name.ts` (pathname → quoted 404 page name, test-pinned), `home-featured-plan.ts` (the reference's hardcoded home middle card + `[e[0], n, e[1]]` slot algorithm, test-pinned), `utils.ts` (`cartTotal` is float-safe via integer cents — unit-tested; don't replace with naive reduce).
 - Demo credentials (seeded): `demo@fitpro.app` / `Demo1234!` (`tests/e2e/helpers.ts`).
 - Reference recon artifacts (screenshots, extracted bundle snippets) live outside the repo and are not needed for development; `docs/screenshots/` holds the current captures.
 
