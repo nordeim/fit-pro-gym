@@ -173,4 +173,38 @@ test.describe("cart route", () => {
     expect(count.count).toBe(0);
     await expect(page).toHaveURL(/\/Home/, { timeout: 15_000 });
   });
+
+  test("checkout inputs render the reference's muted-foreground placeholders", async ({ page }) => {
+    // Reference ground truth: its checkout inputs carry BOTH the Input
+    // base's placeholder:text-muted-foreground and the page's
+    // placeholder:text-gray-400 — the v3 stylesheet emits the
+    // muted-foreground rule LATER, so the rendered placeholder is
+    // hsl(0 0% 45.1%) == rgb(115, 115, 115). The clone pins the same
+    // rendered color via an explicit placeholder:text-muted-foreground.
+    const products = (await (await page.request.get("/api/products")).json()) as Array<{
+      id: string;
+      name: string;
+      price: number;
+      imageUrl: string | null;
+    }>;
+    const pw = products.find((p) => p.name === "Whey Protein Powder")!;
+    await addLine(page, {
+      itemType: "product",
+      itemId: pw.id,
+      itemName: pw.name,
+      price: pw.price,
+      quantity: 1,
+      imageUrl: pw.imageUrl,
+    });
+
+    await page.goto("/Cart");
+    for (const label of ["Street Address", "City", "State", "ZIP Code"]) {
+      const input = page.getByLabel(label, { exact: false });
+      await expect(input).toBeVisible();
+      const ph = await input.evaluate((el) =>
+        getComputedStyle(el as HTMLElement, "::placeholder").color
+      );
+      expect(ph).toMatch(/115,\s*115,\s*115/);
+    }
+  });
 });

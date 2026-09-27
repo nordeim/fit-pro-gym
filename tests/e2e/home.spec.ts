@@ -43,6 +43,22 @@ test.describe("home hero (reference parity)", () => {
     await expect(blurred).toHaveCount(6);
     const solid = hero.locator('div[class*="via-blue-300"], div[class*="via-green-300"]');
     await expect(solid).toHaveCount(2);
+
+    // S7-R12: every streak is absolutely positioned (the reference's DOM
+    // renders `absolute top-[N%] h-N w-full …`). Without `absolute` the 8
+    // lines stack in-flow and inflate the hero by 48px.
+    for (let i = 0; i < 8; i++) {
+      const pos = await lines.nth(i).evaluate((el) => getComputedStyle(el).position);
+      expect(pos).toBe("absolute");
+    }
+  });
+
+  test("hero section height matches the reference's 840px", async ({ page }) => {
+    // Reference-measured: 840px at 1280×720 (the pre-S7-R12 clone measured
+    // 888px — 48px of in-flow speed lines + the line-height inflation).
+    const hero = page.locator(HERO).first();
+    const h = await hero.evaluate((el) => Math.round(el.getBoundingClientRect().height));
+    expect(Math.abs(h - 840)).toBeLessThanOrEqual(2);
   });
 
   test("hero headline, CTAs, and tri-color stats render", async ({ page }) => {
@@ -258,5 +274,74 @@ test.describe("Shop page toolbar (reference parity)", () => {
     const logout = page.getByRole("button", { name: "Logout", exact: true });
     await expect(logout).toBeVisible();
     await expect(logout).toHaveClass(/text-xs/);
+  });
+});
+
+test.describe("hero typography cascade (reference v3 emission parity)", () => {
+  // The reference app is compiled with Tailwind v3: its responsive text-size
+  // rules are emitted AFTER the base leading-* utilities, so on the rendered
+  // reference `md:text-6xl`'s bundled line-height (1) beats the base
+  // `leading-tight` (1.25) and `md:text-2xl`'s 2rem beats `leading-relaxed`
+  // (1.625). Tailwind v4's --tw-leading mechanism reverses that precedence,
+  // so the clone pins the reference's COMPUTED geometry explicitly.
+  test.use({ viewport: { width: 1280, height: 800 } });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/Home");
+  });
+
+  test("hero h1 renders the reference's 60px line-height (lh 1 at desktop)", async ({ page }) => {
+    const h1 = page.getByRole("heading", { name: "Unleash Your Ultimate Potential" });
+    const lh = await h1.evaluate((el) => getComputedStyle(el).lineHeight);
+    expect(lh).toBe("60px"); // reference-measured: 60px (clone pre-fix: 75px)
+  });
+
+  test("hero lede renders the reference's 32px line-height (2rem at desktop)", async ({ page }) => {
+    const lede = page
+      .getByText("Premium fitness experience with state-of-the-art equipment")
+      .first();
+    const lh = await lede.evaluate((el) => getComputedStyle(el).lineHeight);
+    expect(lh).toBe("32px"); // reference-measured: 32px (clone pre-fix: 39px)
+  });
+
+  test("buttons render the reference's pointer cursor", async ({ page }) => {
+    // The reference's bundle carries a base rule
+    // `button,[role=button]{cursor:pointer}`; Tailwind v4's default shadcn
+    // components ship cursor:default. Pin the reference's hand cursor.
+    const cursors = await page.evaluate(() => {
+      const btns = [
+        ...document.querySelectorAll("header button, main button"),
+      ].slice(0, 10);
+      return btns.map((b) => getComputedStyle(b).cursor);
+    });
+    expect(cursors.length).toBeGreaterThanOrEqual(5);
+    for (const c of cursors) {
+      expect(c).toBe("pointer");
+    }
+  });
+
+  test("the plans-preview CTA renders the reference's solid blue default-size button", async ({ page }) => {
+    // Reference DOM: <button class="… text-primary-foreground shadow h-10
+    // rounded-md bg-blue-600 hover:bg-blue-700 font-semibold px-6">
+    // View All Plans <svg lucide-arrow-right w-4 h-4 ml-2> — a SOLID blue,
+    // text-sm (base) button, NOT a gradient size=lg pill.
+    const btn = page.getByRole("button", { name: "View All Plans" });
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveClass(/bg-blue-600/);
+    await expect(btn).toHaveClass(/hover:bg-blue-700/);
+    await expect(btn).toHaveClass(/h-10/);
+    await expect(btn).toHaveClass(/px-6/);
+    await expect(btn).toHaveClass(/font-semibold/);
+    await expect(btn).not.toHaveClass(/text-lg/);
+    await expect(btn).not.toHaveClass(/bg-gradient-to-r/);
+
+    const box = await btn.boundingBox();
+    expect(box?.height).toBe(40); // reference-measured h-10
+    const fs = await btn.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(fs).toBe("14px"); // text-sm — the reference's CTA size
+
+    const icon = btn.locator("svg");
+    await expect(icon).toHaveClass(/h-4/);
+    await expect(icon).toHaveClass(/w-4/);
   });
 });

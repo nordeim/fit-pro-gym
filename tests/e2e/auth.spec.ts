@@ -103,4 +103,53 @@ test.describe("login route", () => {
     await page.goto("/login");
     await expect(page).toHaveTitle("FitPro GYM App");
   });
+
+  test("login labels render the reference's plain-label styling (20px line-height)", async ({ page }) => {
+    // Reference DOM (login platform bundle):
+    // <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70
+    //   text-sm font-medium text-slate-700" for="email">Email</label>
+    // — a PLAIN label (no leading-none → computed lh 20px from text-sm),
+    // unlike the reference's checkout form which uses its shadcn Label
+    // (WITH leading-none, lh 14px). The clone's auth form must render the
+    // plain variant.
+    await page.goto("/login");
+    const email = page.getByLabel("Email", { exact: true });
+    await expect(email).toBeVisible();
+
+    const label = page.locator("label[for=email]");
+    await expect(label).toHaveText("Email");
+    await expect(label).toHaveClass(/text-sm/);
+    await expect(label).toHaveClass(/font-medium/);
+    await expect(label).toHaveClass(/text-slate-700/);
+    await expect(label).not.toHaveClass(/leading-none/);
+    const lh = await label.evaluate((el) => getComputedStyle(el).lineHeight);
+    expect(lh).toBe("20px"); // reference-measured (clone pre-fix: 14px)
+
+    const pwLabel = page.locator("label[for=password]");
+    const pwLh = await pwLabel.evaluate((el) => getComputedStyle(el).lineHeight);
+    expect(pwLh).toBe("20px");
+  });
+
+  test("login label→input spacing matches the reference (v3 space-y semantics)", async ({ page }) => {
+    // S7-R13: Tailwind v4's space-y-* emits margin-bottom on the PRECEDING
+    // sibling, but the reference's labels are display:inline — vertical
+    // margins on inline elements are ignored, so the clone's label→input
+    // gap collapsed to the line-box overhang (~4px). v3's space-y put
+    // margin-top on the BLOCK input wrapper (6px). The clone pins that
+    // gap explicitly with mt-1.5; the reference-measured field group is
+    // 78px (label line-box 20 + gap 6 + input 48 + slack).
+    await page.goto("/login");
+    const groups = page.locator("main div[class*='space-y-1']");
+    await expect(groups).toHaveCount(2);
+    for (let i = 0; i < 2; i++) {
+      const gap = await groups.nth(i).evaluate((el) => {
+        const label = el.querySelector("label")!;
+        const wrap = el.querySelector("div.relative")!;
+        const g = el.getBoundingClientRect();
+        const labelLineBoxBottom = label.getBoundingClientRect().top + 20; // lh 20px
+        return Math.round(wrap.getBoundingClientRect().top - labelLineBoxBottom);
+      });
+      expect(gap).toBe(6);
+    }
+  });
 });

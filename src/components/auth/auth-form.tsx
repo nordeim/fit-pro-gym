@@ -9,7 +9,6 @@ import { useApp } from "@/components/providers";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 /** Google "G" mark (inline SVG, no external asset). */
 function GoogleIcon({ className }: { className?: string }) {
@@ -150,10 +149,19 @@ export function AuthForm() {
                 <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
                   <div className="space-y-3 sm:space-y-4">
                     <div className="space-y-1.5">
-                      <Label htmlFor="email" className="text-slate-700">
+                      {/* S7-R7: the reference's login labels are PLAIN <label>
+                          elements (its login shell renders
+                          peer-disabled:cursor-not-allowed peer-disabled:
+                          opacity-70 text-sm font-medium text-slate-700 —
+                          no leading-none, computed line-height 20px), unlike
+                          its checkout form which uses the shadcn Label. */}
+                      <label
+                        htmlFor="email"
+                        className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-medium text-slate-700"
+                      >
                         Email
-                      </Label>
-                      <div className="relative">
+                      </label>
+                      <div className="relative mt-1.5">
                         <Mail
                           className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
                           aria-hidden
@@ -172,10 +180,13 @@ export function AuthForm() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="password" className="text-slate-700">
+                      <label
+                        htmlFor="password"
+                        className="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-medium text-slate-700"
+                      >
                         Password
-                      </Label>
-                      <div className="relative">
+                      </label>
+                      <div className="relative mt-1.5">
                         <Lock
                           className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
                           aria-hidden

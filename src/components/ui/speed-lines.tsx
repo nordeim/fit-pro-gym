@@ -21,6 +21,12 @@ export function SpeedLines({ lines, className }: { lines: SpeedLine[]; className
           key={`${line.top}-${i}`}
           aria-hidden
           className={cn(
+            // S7-R12: the reference's streak divs are `absolute top-[N%]
+            // h-N w-full …` — WITHOUT `absolute` the lines stack in-flow
+            // ahead of the content container, inflating both hero sections
+            // by 48px (the sum of the 8 line thicknesses) and pushing the
+            // hero content down. Extracted from the reference's live DOM.
+            "absolute",
             `${line.top} ${line.height} w-full bg-gradient-to-r ${line.gradient} ${line.opacity}`,
             line.shadow,
             className

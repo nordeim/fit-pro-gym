@@ -155,9 +155,11 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-8 text-center">
-          <h1 className="mb-4 text-4xl font-bold text-white">Premium Fitness Store</h1>
-          <p className="text-lg text-gray-400">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Premium Fitness Store
+          </h1>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
             Discover professional-grade equipment, premium supplements, and
             accessories to elevate your fitness journey.
           </p>
@@ -172,12 +174,11 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
                 aria-hidden
               />
               <Input
-                type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search products by name..."
                 aria-label="Search products by name"
-                className="h-9 border-slate-600 bg-slate-700 pl-10 text-white placeholder:text-gray-400 focus:border-slate-500"
+                className="h-9 border-slate-600 bg-slate-700 pl-10 text-white placeholder:text-muted-foreground focus:border-slate-500"
               />
             </div>
             <Select value={category} onValueChange={setCategory}>

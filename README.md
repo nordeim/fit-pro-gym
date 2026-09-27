@@ -28,7 +28,7 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 | 🔐 **Cookie-session auth** | scrypt password hashing + HMAC-signed sessions, per-IP login rate limiting (10 fails / 15 min → 429 with `Retry-After`), the reference's login card (real logo image, red Alert errors with the reference's exact copy), authenticated `/login` renders the form (no redirect — reference parity) — zero external auth dependencies |
 | 📱 **Reference mobile chrome** | Sticky blur header (h-16) with logo, cart badge, hamburger; the collapsible mobile menu renders from React state with `aria-expanded`/`aria-controls`, closes on route change (React's render-time adjustment pattern), and swaps the user cluster for Login when logged out |
 | 🎨 **Dark premium design system** | gray-900 canvas, glass cards (`bg-white/5` + backdrop-blur), the reference's exact brand tokens (`--gym-primary: #0ea5e9`, `--gym-secondary: #10b981`), and the reference's toast palette (green/red/blue at 20% alpha) |
-| 🧪 **Battle-tested** | 47 Vitest unit tests (db-path resolution contract, speed-line specs, shop categories, 404 page-name seam, the home preview's hardcoded featured-plan card + slot algorithm, float-safe money math, serializers) + 58 Playwright e2e specs across auth, mobile navigation, home parity, icon-geometry pins, 404 surface, shop, memberships, and cart — all green |
+| 🧪 **Battle-tested** | 47 Vitest unit tests (db-path resolution contract, speed-line specs, shop categories, 404 page-name seam, the home preview's hardcoded featured-plan card + slot algorithm, float-safe money math, serializers) + 74 Playwright e2e specs across auth, mobile navigation, home parity, icon-geometry pins, 404 surface, shop, memberships, and cart — including pins for the reference's v3-emission typography (hero line-heights, section heights), button cursor, placeholder colors, and label geometry — all green |
 
 ## Screenshots
 
@@ -173,7 +173,7 @@ bun run typecheck     # tsc --noEmit
 bun run lint          # eslint .
 
 # E2E (Playwright): builds the standalone server, boots it on :3100 with an
-# isolated db/e2e.db, signs the demo user in once (storageState), 64 specs.
+# isolated db/e2e.db, signs the demo user in once (storageState), 74 specs.
 bun run build         # prerequisite: the standalone server must exist
 bun run test:e2e
 ```
@@ -229,7 +229,7 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 | Recon & design extraction | ✅ Complete | Reference app audited (DOM, bundle, entity API, VLM) — exact tokens/markup captured |
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
 | Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) |
-| Test suites | ✅ Complete | 47 unit + 64 e2e (incl. 17 home reference-parity specs + icon-geometry/404 pins + shop card geometry/gap/empty-state pins), all green; lint + typecheck clean |
+| Test suites | ✅ Complete | 47 unit + 74 e2e (incl. 22 home reference-parity specs, icon-geometry/404 pins, shop card geometry/gap/empty-state pins, hero typography-cascade pins, login label geometry pins), all green; lint + typecheck clean |
 | Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md |
 
 ## License

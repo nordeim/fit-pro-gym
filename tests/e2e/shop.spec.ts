@@ -92,21 +92,25 @@ test.describe("shop route", () => {
     // Geometry: the price row bottom == card bottom - 16px (p-4) for every
     // card in the row (this is 49px on the un-remediated clone because the
     // 2-line Dumbbells name stretches the row height).
-    const cardCount = await grid.locator("div.flex-grow").count();
-    expect(cardCount).toBe(4);
-    for (let i = 0; i < cardCount; i++) {
-      const body = grid.locator("div.flex-grow").nth(i);
-      // The card wrapper is the body div's direct parent (the motion.div
-      // that owns the border/rounded classes and stretches to the row height)
-      const card = body.locator("xpath=..");
-      const priceRow = body.locator("div:has(> span.text-2xl)");
-      const cardBox = await card.boundingBox();
-      const priceBox = await priceRow.boundingBox();
-      expect(cardBox).not.toBeNull();
-      expect(priceBox).not.toBeNull();
-      const cardBottom = cardBox!.y + cardBox!.height;
-      const priceBottom = priceBox!.y + priceBox!.height;
-      const gapPx = Math.round(cardBottom - priceBottom);
+    // NOTE: measure BOTH boxes inside a single evaluate() call. The cards
+    // animate in via framer-motion (y: 20 -> 0, 400ms + 50ms stagger) and
+    // two sequential locator.boundingBox() calls can straddle the
+    // animation — card box read mid-flight (transform offset applied),
+    // row box read after settle — inflating the gap by up to 20px (a
+    // flake observed after the session-6 build; the settled geometry is
+    // 16px + subpixel rounding on every card).
+    const gaps = await grid.evaluate((g) => {
+      const bodies = [...g.querySelectorAll("div.flex-grow")];
+      return bodies.map((b) => {
+        const card = b.parentElement as HTMLElement;
+        const row = b.querySelector("div.mt-4") as HTMLElement;
+        return Math.round(
+          card.getBoundingClientRect().bottom - row.getBoundingClientRect().bottom
+        );
+      });
+    });
+    expect(gaps.length).toBe(4);
+    for (const gapPx of gaps) {
       expect(Math.abs(gapPx - 16)).toBeLessThanOrEqual(2);
     }
   });
@@ -129,5 +133,41 @@ test.describe("shop route", () => {
     // The badge total reflects the new quantity
     const badge = page.locator("header span").filter({ hasText: /^\d+$/ });
     await expect(badge.first()).toHaveText("1");
+  });
+
+  test("shop hero typography matches the reference (md:text-5xl h1 + text-xl p + mb-12)", async ({ page }) => {
+    // Reference DOM: <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+    //                 <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+    //                 wrapper: <div class="text-center mb-12">
+    const h1 = page.getByRole("heading", { name: "Premium Fitness Store" });
+    await expect(h1).toHaveClass(/md:text-5xl/);
+    await expect(h1).toHaveClass(/mb-6/);
+    const fs = await h1.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(fs).toBe("48px"); // reference-measured at 1280px (clone pre-fix: 36px)
+
+    const lede = page.getByText("Discover professional-grade equipment").first();
+    await expect(lede).toHaveClass(/text-xl/);
+    await expect(lede).toHaveClass(/text-gray-300/);
+    await expect(lede).toHaveClass(/max-w-3xl/);
+    await expect(lede).toHaveClass(/mx-auto/);
+    const ledeFs = await lede.evaluate((el) => getComputedStyle(el).fontSize);
+    expect(ledeFs).toBe("20px"); // clone pre-fix: 18px (text-lg)
+
+    await expect(lede.locator("xpath=..")).toHaveClass(/mb-12/);
+  });
+
+  test("search input renders the reference's untyped input + muted-foreground placeholder", async ({ page }) => {
+    const input = page.getByLabel("Search products by name");
+    // The reference's search input carries NO type attribute (plain text)
+    const type = await input.evaluate((el) => (el as HTMLInputElement).getAttribute("type"));
+    expect(type).toBeNull();
+
+    // The reference renders #737373 (hsl 0 0% 45.1%): its Input base's
+    // placeholder:text-muted-foreground wins the v3 cascade over the page's
+    // placeholder-gray-400. rgb(115, 115, 115) == hsl(0 0% 45.1%)
+    const ph = await input.evaluate((el) =>
+      getComputedStyle(el as HTMLElement, "::placeholder").color
+    );
+    expect(ph).toMatch(/115,\s*115,\s*115/);
   });
 });

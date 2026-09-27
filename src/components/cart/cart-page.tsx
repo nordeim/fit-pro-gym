@@ -172,7 +172,7 @@ function CheckoutForm({
                 placeholder="123 Main Street"
                 required
                 autoComplete="street-address"
-                className="border-white/20 bg-white/10 text-white placeholder:text-gray-400"
+                className="border-white/20 bg-white/10 text-white placeholder:text-muted-foreground"
               />
             </div>
 
@@ -188,7 +188,7 @@ function CheckoutForm({
                   placeholder="New York"
                   required
                   autoComplete="address-level2"
-                  className="border-white/20 bg-white/10 text-white placeholder:text-gray-400"
+                  className="border-white/20 bg-white/10 text-white placeholder:text-muted-foreground"
                 />
               </div>
               <div>
@@ -202,7 +202,7 @@ function CheckoutForm({
                   placeholder="NY"
                   required
                   autoComplete="address-level1"
-                  className="border-white/20 bg-white/10 text-white placeholder:text-gray-400"
+                  className="border-white/20 bg-white/10 text-white placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -219,7 +219,7 @@ function CheckoutForm({
                 required
                 inputMode="numeric"
                 autoComplete="postal-code"
-                className="border-white/20 bg-white/10 text-white placeholder:text-gray-400"
+                className="border-white/20 bg-white/10 text-white placeholder:text-muted-foreground"
               />
             </div>
           </div>

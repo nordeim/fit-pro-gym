@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.4.0
+version: 1.5.0
 last_updated: 2026-09-27
-project_state: 47 unit tests + 64 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 6 — catalog = the reference's real 4 products, shop card geometry/gap/empty-state, cross-sell card radius, native rail scrollbar)
+project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 7 — the reference's v3-emission typography/line-heights pinned, speed lines absolute, @theme hsl() wrappers, button cursor, placeholder colors, shop hero, login label geometry)
 tags:
   - nextjs
   - tailwind-v4
@@ -355,7 +355,11 @@ is deliberately not cloned.
 | Home Pro card shows six features / missing "Premium equipment access" | The preview is rendering the ENTITY row instead of the hardcoded card | `homePlanSlots` (src/lib/home-featured-plan.ts) replaces the middle slot — don't bypass it |
 | Login error text mismatch | API copy diverged from the reference's alert | The string is "Invalid email or password" — pinned by `auth.spec.ts` |
 | Toast text "wrong" | Copy is a parity contract | Exact strings live in the components + `CLAUDE.md` list |
-| Speed lines look stacked at top | (If ever) missing `top-[N%]` utilities | Verify `getComputedStyle(line).top`; specs in `speed-lines.ts` |
+| Speed lines look stacked at top | Missing `top-[N%]` utilities OR the `absolute` class (session-7 find: the component had omitted `absolute` — 8 in-flow lines inflated both heroes 48px while still animating, so text audits never caught it) | Verify `getComputedStyle(line).position === 'absolute'`; specs in `speed-lines.ts` + the e2e hero-height/position pins |
+| A shadcn color utility renders as the text/border color instead of its token (e.g. placeholder shows currentColor) | The `@theme inline` mapping lacks the `hsl()` wrapper — HSL-triplet vars are invalid bare color values | `--color-muted-foreground: hsl(var(--muted-foreground))`; check the generated rule resolves to a real color |
+| Hero h1/lede taller than the reference | v3 vs v4 cascade: `md:text-6xl` + `leading-tight` — v3 lets the text size's own line-height win | `md:leading-none` (h1) / `md:leading-[2rem]` (lede) — pinned by the e2e computed-line-height specs |
+| Buttons show the default arrow cursor | The reference's `button,[role=button]{cursor:pointer}` base rule was removed | Restore it in `globals.css` `@layer base` |
+| Login card height off by ~12px | v4 `space-y` margin-bottom on the preceding INLINE label is ignored (v3 put margin-top on the block wrapper) | `mt-1.5` on the input wrappers; check the e2e field-gap spec |
 | Dev server dies between shell commands (sandbox) | Process reaper kills tool-call children | Double-fork daemonize: `( ( exec setsid CMD > log 2>&1 < /dev/null ) & )` |
 
 ---
@@ -367,19 +371,20 @@ bun run lint          # clean
 bun run typecheck     # clean
 bun run test          # 47/47
 bun run build         # standalone compiles
-bun run test:e2e      # 64/64
+bun run test:e2e      # 74/74
 ```
 
 Then the human-pass list:
 - [ ] Mobile menu: opens (aria-expanded), links navigate, auto-closes on route change, no `hidden` attribute in the DOM (`#mobile-navigation` count 0 when closed)
 - [ ] `/` renders Home, `/Home` marks the nav pill, `/` marks none
-- [ ] Hero shows 8 animated lines over the gradient canvas
+- [ ] Hero shows 8 animated lines over the gradient canvas, every line `position:absolute`, hero section 840px at desktop
+- [ ] Buttons show the pointer cursor everywhere (the reference's base rule)
 - [ ] Memberships: Crown badge ≈65px from the card top; rail scrolls horizontally
-- [ ] Shop: toolbar sticks under the header on scroll; category dropdown is Title Case; filter actually filters
-- [ ] Cart: add → badge bumps + exact toast; checkout clears cart + success toast + redirect
-- [ ] Login: renders while authenticated; bad credentials → red Alert "Invalid email or password"; page title is the absolute "FitPro GYM App"
+- [ ] Shop: toolbar sticks under the header on scroll; category dropdown is Title Case; filter actually filters; hero h1 renders 48px (`md:text-5xl`); search placeholder reads #737373
+- [ ] Cart: add → badge bumps + exact toast; checkout clears cart + success toast + redirect; checkout placeholders read #737373
+- [ ] Login: renders while authenticated; bad credentials → red Alert "Invalid email or password"; page title is the absolute "FitPro GYM App"; labels are plain `text-sm font-medium` (20px line-height), card 746px
 - [ ] `/signup` shows the branded 404 (HTTP 200); unknown route → 404 page + HTTP 404
-- [ ] Home plan preview: Family Pack → HARDCODED Pro Athlete (5 features incl. "Premium equipment access") → Starter; the middle card ignores the entity row
+- [ ] Home plan preview: Family Pack → HARDCODED Pro Athlete (5 features incl. "Premium equipment access") → Starter; the middle card ignores the entity row; the "View All Plans" CTA is a solid blue default-size button (h-10, text-sm)
 - [ ] Home shop preview: Pre-Workout → Yoga Mat → Dumbbells → Whey; cross-sell shows the first three of those
 - [ ] lucide-react still pinned at 0.475.0 (icon paths unchanged)
 - [ ] `.env` never committed with secrets (the committed one is template-only); `db/*.db` and `tests/e2e/.auth/` are git-ignored

@@ -13,7 +13,12 @@ function Label({
     <LabelPrimitive.Root
       data-slot="label"
       className={cn(
-        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        // S7-R7: the reference's shadcn Label base (v3-era, extracted from
+        // its bundle): text-sm font-medium leading-none peer-disabled:*.
+        // The v4-shadcn base (flex items-center gap-2 select-none
+        // group-data-[disabled=true]:* peer-disabled:opacity-50) drifted
+        // both the class string and the rendered line-height.
+        "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
         className
       )}
       {...props}

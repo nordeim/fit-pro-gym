@@ -28,7 +28,7 @@ export function Hero() {
         <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl font-bold leading-tight md:text-6xl">
+              <h1 className="text-4xl font-bold leading-tight md:text-6xl md:leading-none">
                 Unleash Your{" "}
                 <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">
                   {" "}
@@ -36,7 +36,12 @@ export function Hero() {
                 </span>
                 Potential
               </h1>
-              <p className="text-xl leading-relaxed text-gray-300 md:text-2xl">
+              {/* S7-R2: the reference's v3 stylesheet emits its responsive
+                  text-size rules after the base leading-* utilities, so
+                  md:text-2xl's bundled 2rem line-height beats leading-relaxed
+                  on desktop — pinned explicitly (v4's --tw-leading mechanism
+                  would otherwise reverse that precedence). */}
+              <p className="text-xl leading-relaxed text-gray-300 md:text-2xl md:leading-[2rem]">
                 Premium fitness experience with state-of-the-art equipment, expert
                 trainers, and a community that drives results.
               </p>

@@ -53,12 +53,13 @@ export function PlansPreview({ memberships }: { memberships: MembershipDTO[] }) 
           className="mt-12 text-center"
         >
           <Link href="/Memberships">
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-green-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:shadow-xl hover:shadow-blue-500/25"
-            >
+            {/* S7-R11: the reference renders this CTA as a SOLID blue,
+                default-size button (text-sm font-semibold, h-10, px-6,
+                shadow, ArrowRight w-4 h-4) — not a gradient size="lg"
+                pill. Classes extracted from its DOM. */}
+            <Button className="h-10 rounded-md bg-blue-600 px-6 font-semibold text-primary-foreground shadow hover:bg-blue-700">
               View All Plans
-              <ArrowRight className="ml-2 h-5 w-5" aria-hidden />
+              <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
             </Button>
           </Link>
         </motion.div>
