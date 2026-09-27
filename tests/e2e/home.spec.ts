@@ -160,17 +160,22 @@ test.describe("plans preview + shop preview (reference parity)", () => {
   test("shop preview renders the four NEWEST featured products, creation-desc", async ({
     page,
   }) => {
-    // Reference: Product?featured=true&sort=-created_date&limit=4 — with its
-    // four original featured products tied, its backend tie order is
-    // [Pre-Workout, Yoga Mat, Dumbbells, Whey] (newest first). The seed
-    // staggers createdAt in that order (the injected XSS junk row on the
-    // reference is deliberately not part of this clone's catalog).
+    // Reference: Product?featured=true&sort=-created_date&limit=4. Its
+    // injected XSS junk row (featured, created 2026-05-15) now holds slot 1
+    // and displaces Whey from the limit-4 window; the REAL products behind
+    // it tie at 2025-07-01T14:15:08.553Z and their -created_date tie order
+    // (re-audited live 2026-09-28, stable across 3 fetches) is
+    // [Yoga Mat, Dumbbells, Pre-Workout, Whey] (newest first). The seed
+    // staggers createdAt in that order; the junk row stays deliberately
+    // not part of this clone's catalog, so the clone shows all four REAL
+    // products with Whey filling the slot the junk row occupies on the
+    // reference.
     const section = page.locator('section:has(h2:has-text("Professional Fitness Gear"))');
     const names = section.locator("h3");
     await expect(names).toHaveCount(4, { timeout: 15_000 });
-    await expect(names.nth(0)).toHaveText("Pre-Workout Energy");
-    await expect(names.nth(1)).toHaveText("Yoga Mat Premium");
-    await expect(names.nth(2)).toHaveText("Professional Dumbbells Set");
+    await expect(names.nth(0)).toHaveText("Yoga Mat Premium");
+    await expect(names.nth(1)).toHaveText("Professional Dumbbells Set");
+    await expect(names.nth(2)).toHaveText("Pre-Workout Energy");
     await expect(names.nth(3)).toHaveText("Whey Protein Powder");
   });
 

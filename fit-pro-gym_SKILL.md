@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.5.0
-last_updated: 2026-09-27
-project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 7 — the reference's v3-emission typography/line-heights pinned, speed lines absolute, @theme hsl() wrappers, button cursor, placeholder colors, shop hero, login label geometry)
+version: 1.6.0
+last_updated: 2026-09-28
+project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 8 — the reference's product -created_date tie order re-audited and re-pinned [Yoga, Dumbbells, Pre, Whey]; its featured XSS junk row now displaces Whey from the home preview window; mobile nav verified a 4th consecutive session, zero Tailwind v4 bugs)
 tags:
   - nextjs
   - tailwind-v4
@@ -284,7 +284,7 @@ lists); parsing happens ONLY in `src/lib/serialize.ts`.
 |--------|------|-------|
 | User | 1 | `demo@fitpro.app` / `Demo1234!` |
 | MembershipPlan | 4 | Starter $29 (orange), Basic Fit $39 (blue), Pro Athlete $59 (green, popular — 6 features incl. Recovery room access), Family Pack $149 (purple). Fixed `PLAN_CREATED` dates mirror the reference's real entity dates (two tie groups: 2025-07-01 / 2025-07-30) |
-| Product | 4 | The reference's REAL entity data (all featured): Pre-Workout Energy $34 (supplements), Yoga Mat Premium $79 (accessories), Professional Dumbbells Set $299 (equipment), Whey Protein Powder $49 (supplements). 200ms `createdAt` stagger pins the featured `-created_date` order [Pre-Workout, Yoga Mat, Dumbbells, Whey]. Session-6 removed 4 invented demo rows that never existed on the reference |
+| Product | 4 | The reference's REAL entity data (all featured): Pre-Workout Energy $34 (supplements), Yoga Mat Premium $79 (accessories), Professional Dumbbells Set $299 (equipment), Whey Protein Powder $49 (supplements). 200ms `createdAt` stagger pins the featured `-created_date` tie order — which is SERVER-DRIFTABLE: re-audited live 2026-09-28 at [Yoga Mat, Dumbbells, Pre-Workout, Whey] (flipped from the session-5 order; the reference's featured XSS junk row, created 2026-05-15, now displaces Whey from its limit-4 window). Session-6 removed 4 invented demo rows that never existed on the reference |
 
 Run: `DATABASE_URL="file:../db/custom.db" bun run db:seed` (the prefix guards
 against shell-env hijack). The reference's injected "XSS-INJECT-TEST" junk row
@@ -402,6 +402,7 @@ Then the human-pass list:
 | 5 | Pin visual parity in TESTS (unit for spec data, e2e for rendered classes) — screenshots rot, class assertions don't. | Session-2 TDD |
 | 6 | A referenced-but-unwired env var (`NEXT_PUBLIC_SITE_URL`) is a doc bug: wire it or remove it. | Session-2 docs |
 | 7 | Seed data rots: verify every remote image URL with a HEAD request before shipping. | Session-2 seed fix |
+| 8 | The reference's `-created_date` tie order is server-side state, not a contract — it flipped between sessions with zero entity edits. Re-query the entity API every audit cycle and re-pin the stagger + e2e order pins when it moves. | Session-8 audit |
 
 ---
 

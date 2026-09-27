@@ -133,16 +133,6 @@ async function main() {
     featured: boolean;
   }> = [
     {
-      name: "Pre-Workout Energy",
-      description: "Natural pre-workout supplement for enhanced performance",
-      price: 34,
-      category: "supplements",
-      imageUrl:
-        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      stockQuantity: 35,
-      featured: true,
-    },
-    {
       name: "Yoga Mat Premium",
       description: "Non-slip yoga mat with superior grip and comfort",
       price: 79,
@@ -160,6 +150,16 @@ async function main() {
       imageUrl:
         "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       stockQuantity: 15,
+      featured: true,
+    },
+    {
+      name: "Pre-Workout Energy",
+      description: "Natural pre-workout supplement for enhanced performance",
+      price: 34,
+      category: "supplements",
+      imageUrl:
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      stockQuantity: 35,
       featured: true,
     },
     {
@@ -184,13 +184,21 @@ async function main() {
   // (The reference's injected "XSS-INJECT-TEST" junk row remains
   // deliberately absent — data-hygiene stance.)
 
-  // The reference's four original featured products share ONE timestamp
-  // (2025-07-01T14:15:08.553Z); its -created_date tie order renders
-  // [Pre-Workout, Yoga Mat, Dumbbells, Whey] — that is the exact order its
-  // featured preview (featured&-created_date&limit=4) and cross-sell
-  // (limit=3) render. The 200ms stagger below pins createdAt desc to the
-  // array order so SQLite ties can never flip it (the reference's injected
-  // "XSS-INJECT-TEST" junk row is deliberately absent from this seed).
+  // SESSION-8 PARITY FIX (S8-R1): the reference's four original featured
+  // products share ONE timestamp (2025-07-01T14:15:08.553Z); its -created_date
+  // tie order is SERVER-DRIFTABLE and was re-audited live on 2026-09-28
+  // (stable across 3 consecutive fetches): the real products now render
+  // [Yoga Mat, Dumbbells, Pre-Workout, Whey] (newest first) — flipped from
+  // the session-5 order [Pre-Workout, Yoga Mat, Dumbbells, Whey]. The
+  // reference's injected "XSS-INJECT-TEST" junk row (featured, created
+  // 2026-05-15) now holds slot 1 of its featured&-created_date&limit=4 home
+  // preview and displaces Whey from the window; it remains deliberately
+  // absent from this seed (data-hygiene stance, pinned by the home e2e
+  // spec), so the clone renders all four REAL products with Whey filling
+  // the slot the junk row occupies on the reference. The 200ms stagger
+  // below pins createdAt desc to the array order so SQLite ties can never
+  // flip it. The Shop page is unaffected (it sorts alphabetically
+  // client-side, mirroring the reference).
   const PRODUCT_ANCHOR = new Date("2025-07-01T14:15:08.553Z").getTime();
   const productCreated = (i: number) => new Date(PRODUCT_ANCHOR - i * 200);
   for (const [i, product] of products.entries()) {

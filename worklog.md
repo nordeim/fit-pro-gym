@@ -138,3 +138,20 @@ Work Log:
 
 Stage Summary:
 - Session 7 delivered: the reference's Tailwind-v3 emission semantics reproduced in the v4 clone (typography cascade, space-y direction, placeholder cascade) + the speed-lines positioning bug + the @theme hsl() root-cause fix + button cursor + shop/login geometry (13 defects, +10 e2e specs, one race-hardened spec); all gates green; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
+
+---
+Task ID: 11
+Agent: Super Z (main, session 8)
+Task: Session-8 cycle: refresh, re-audit live target (mobile menu first), remediate new parity defects (TDD), screenshots, docs, push to main
+
+Work Log:
+- Cloned the repo fresh to /home/z/my-project/fit-pro-gym (HEAD a2f16f1); re-reviewed all root docs + session_10/11 + worklog; validated the codebase (src tree, header mobile-nav patterns, vitest/playwright configs, .env/.env.example alignment). Gates on arrival: lint/typecheck clean, 47/47 unit, build OK, 74/74 e2e.
+- Ops: bun install with the lucide-react 0.475.0 pin verified; db/ folder created at the repo root (db:push + db:seed with the DATABASE_URL="file:../db/custom.db" prefix — the sandbox exports an absolute DATABASE_URL that beats .env); dev server daemonized on :3000 with the same prefix.
+- Audited the live target (logged in with the provided credentials): mobile menu verified end-to-end on BOTH sites at 390×844 (hamburger/X swap, structure, 48px targets, active pill, route-change close, X close — 4th consecutive session with zero Tailwind v4 bugs); entity API re-queried; pinned geometries re-measured at parity (hero 840px desktop / 1111px mobile, Memberships hero 424px, login card 746px, placeholders #737373, button cursors, gap-8 grids, native rail scrollbar); full-page text diffs across all 5 routes.
+- Found 1 root defect (S8-R1): the reference's product -created_date tie order flipped to [Yoga, Dumbbells, Pre-Workout, Whey] (stable ×3 fetches; was [Pre, Yoga, Dumbbells, Whey] in session 5), and its featured XSS junk row (created 2026-05-15) now displaces Whey from the home featured-4 window — the clone pinned the stale order. Target CSS bundle redeployed (index-BCeQAlMu.css) with unchanged v3-emission semantics; cart writes still broken target-side; memberships data unchanged.
+- TDD: updated the home featured-order + cross-sell e2e pins RED-first (both failed pre-fix for exactly the audited reason); reordered the seed's products array so the 200ms stagger pins the current audited tie order (junk row stays excluded — the clone shows all four real products with Whey filling the junk row's slot); re-seeded the dev DB; cosmetic fix to vitest.config.ts's stale scaffold comment.
+- Gates: lint ✓ typecheck ✓ unit 47/47 ✓ build ✓ e2e 74/74 ✓. Live re-verification: home preview + cross-sell match the target's real-product order modulo the documented junk exclusion.
+- 12 screenshots re-captured in docs/screenshots/ (populated 3-line cart via the API; VLM spot-checks clean — only the dev-mode Next.js tools badge, documented benign); docs updated (prompt-to-review-4.md saved, README status table, AGENTS +1 gotcha, CLAUDE parity note, PAD v1.6 revision + 2 ledger rows, SKILL v1.6.0 + lesson #8, new docs/session_12.md); .env.example verified verbatim against the codebase and included in the commit; committed on main and pushed via docs/ssh_git_wrapper_v3.py (fingerprint-verified key, dry-run then real push, remote ref verified, key shredded).
+
+Stage Summary:
+- Session 8 delivered: the reference's server-driftable -created_date tie order re-audited and re-pinned across the seed + 2 e2e order specs; mobile nav re-verified (4th consecutive session, zero v4 bugs); all pinned geometries confirmed at parity; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
