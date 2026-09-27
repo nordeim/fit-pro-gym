@@ -100,7 +100,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="rounded-2xl bg-white p-8 shadow-xl sm:p-10">
+        <div className="relative overflow-hidden rounded-2xl border-0 bg-white/95 p-8 shadow-2xl backdrop-blur-sm sm:p-10">
           {/* Logo chip — a span (the reference's circular chip mark) */}
           <div className="mb-8 flex justify-center">
             <span className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 ring-4 ring-white/50 shadow-lg">
@@ -123,9 +123,9 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" }) {
             type="button"
             variant="outline"
             onClick={onGoogle}
-            className="mb-6 h-12 w-full rounded-lg border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            className="mb-6 flex w-full items-center justify-center gap-3 rounded-xl border-slate-200 bg-white px-5 py-3.5 text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
           >
-            <GoogleIcon className="mr-2 h-4 w-4" />
+            <GoogleIcon className="h-4 w-4" />
             Continue with Google
           </Button>
 

@@ -19,16 +19,16 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 
 | Feature | Description |
 |---------|-------------|
-| 🏠 **Animated landing page** | Hero with six framer-motion neon "speed lines" (cyan/blue/yellow/green/teal gradients at staggered offsets), gradient "Ultimate" headline, tri-color stats (5000+ / 24/7 / 50+), gradient-framed hero image with glow blobs, "Why Choose" spotlight stat cards, plan preview with the popular plan pinned center, hover-reveal shop cards, and the closing CTA band |
-| 💳 **Membership plans** | Four seeded tiers (Starter $29, Basic Fit $39, Pro Athlete $59 — *Most Popular*, Family Pack $149) with per-tier color schemes (blue/green/purple/orange gradients), a horizontally-scrolling plan rail sorted by price, and feature checklists |
-| 🛒 **Premium fitness store** | Product grid with category badges, live search, category filter, and 3-way sort (name / price ↑ / price ↓); round blue add-to-cart buttons with optimistic disabled states |
+| 🏠 **Animated landing page** | Hero on a full gradient canvas (from-gray-900 via-gray-800 with black scrim + blue→green tint) and **eight** framer-motion neon "speed lines" (6 blurred glow streaks + 2 solid via-blue-300/green-300), gradient "Ultimate" headline, tri-color stats (5000+ / 24/7 / 50+), gradient-framed hero image with glow blobs, "Why Choose" glass stat cards (users/award/zap/star icons, scale-in values), plan preview with the popular plan pinned center + gradient promo pill, hover-reveal full-bleed shop cards, and the closing CTA band |
+| 💳 **Membership plans** | Four seeded tiers (Starter $29, Basic Fit $39, Pro Athlete $59 — *Most Popular* (Crown badge), Family Pack $149) with per-tier color schemes (blue/green/purple/orange gradients), a horizontally-scrolling plan rail sorted by price, its own 8-line animated hero, and feature checklists |
+| 🛒 **Premium fitness store** | Product grid with category badges, live search, hardcoded Title Case category filter (Equipment / Supplements / Accessories / Apparel — reference parity), and 3-way sort (name / price ↑ / price ↓) in a **sticky toolbar card**; round blue add-to-cart buttons with optimistic disabled states |
 | 🧺 **Server-truth cart** | Per-user cart lines with quantity steppers (minus disabled at 1), item-type badges, image-fallback initial tiles, live order summary (subtotal / free shipping / total), and the reference's app-level dedupe — re-adding an existing line bumps quantity with distinct toast copy |
 | ✨ **Cross-sell dialog** | Choosing a membership opens "Complete Your Setup" — featured products with one-tap add, "No, Thanks", "Go to Cart", and "Explore Full Store" actions |
 | 📦 **Checkout & orders** | Shipping-address form (street / city / state / ZIP, submit disabled until complete), order placement re-verified server-side against DB prices in a transaction, cart cleared atomically, success toast, and redirect home |
 | 🔐 **Cookie-session auth** | scrypt password hashing + HMAC-signed sessions, per-IP login rate limiting (10 fails / 15 min → 429 with `Retry-After`), login + signup routes, authenticated `/login` redirects — zero external auth dependencies |
 | 📱 **Reference mobile chrome** | Sticky blur header (h-16) with logo, cart badge, hamburger; the collapsible mobile menu renders from React state with `aria-expanded`/`aria-controls`, closes on route change (React's render-time adjustment pattern), and swaps the user cluster for Login when logged out |
 | 🎨 **Dark premium design system** | gray-900 canvas, glass cards (`bg-white/5` + backdrop-blur), the reference's exact brand tokens (`--gym-primary: #0ea5e9`, `--gym-secondary: #10b981`), and the reference's toast palette (green/red/blue at 20% alpha) |
-| 🧪 **Battle-tested** | 25 Vitest unit tests (db-path resolution contract, float-safe money math, serializers) + 29 Playwright e2e specs across auth, mobile navigation, shop, memberships, and cart — all green |
+| 🧪 **Battle-tested** | 36 Vitest unit tests (db-path resolution contract, speed-line specs, shop categories, float-safe money math, serializers) + 43 Playwright e2e specs across auth, mobile navigation, home parity, shop, memberships, and cart — all green |
 
 ## Screenshots
 
@@ -44,9 +44,9 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 |---|---|
 | ![Mobile home](docs/screenshots/home-mobile.png) | ![Mobile menu](docs/screenshots/mobile-menu-open.png) |
 
-| Login | Shop (mobile) |
+| Login | Cross-sell dialog |
 |---|---|
-| ![Login](docs/screenshots/login-desktop.png) | ![Shop mobile](docs/screenshots/shop-mobile.png) |
+| ![Login](docs/screenshots/login-desktop.png) | ![Cross-sell](docs/screenshots/cross-sell-dialog.png) |
 
 ## Architecture
 
@@ -163,12 +163,12 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ## Testing
 
 ```bash
-bun run test          # Vitest — 25 unit specs (db-path, money, serializers)
+bun run test          # Vitest — 36 unit specs (db-path, speed-lines, shop-categories, money, serializers)
 bun run typecheck     # tsc --noEmit
 bun run lint          # eslint .
 
 # E2E (Playwright): builds the standalone server, boots it on :3100 with an
-# isolated db/e2e.db, signs the demo user in once (storageState), 29 specs.
+# isolated db/e2e.db, signs the demo user in once (storageState), 43 specs.
 bun run build         # prerequisite: the standalone server must exist
 bun run test:e2e
 ```
@@ -224,7 +224,7 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 | Recon & design extraction | ✅ Complete | Reference app audited (DOM, bundle, entity API, VLM) — exact tokens/markup captured |
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
 | Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) |
-| Test suites | ✅ Complete | 25 unit + 29 e2e, all green; lint + typecheck clean |
+| Test suites | ✅ Complete | 36 unit + 43 e2e (incl. 15 home reference-parity specs), all green; lint + typecheck clean |
 | Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md |
 
 ## License

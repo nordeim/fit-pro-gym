@@ -6,6 +6,11 @@ import { Toaster } from "@/components/layout/toaster";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  // Canonical public origin (NEXT_PUBLIC_SITE_URL in .env) — resolves
+  // metadataBase + Open Graph URLs when set; harmless when unset (local dev).
+  metadataBase: process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : undefined,
   title: {
     default: "FitPro GYM App",
     template: "%s | FitPro GYM App",

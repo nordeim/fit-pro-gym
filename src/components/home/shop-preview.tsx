@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Zap } from "lucide-react";
+import { ArrowRight, ShoppingBag } from "lucide-react";
 
 import type { ProductDTO } from "@/components/providers";
 import { Button } from "@/components/ui/button";
@@ -14,29 +14,30 @@ const FALLBACK_IMAGE =
 
 /**
  * Home "Professional Fitness Gear" preview — the reference's hover-reveal
- * card: the title lifts on hover, the category + price fade in, and the
- * "Shop Now" button slides up into place.
+ * card: full-bleed image with a bottom gradient scrim, the title lifts on
+ * hover while the category + price fade in, and the "Shop Now" button
+ * slides up into place.
  */
 export function ShopPreview({ products }: { products: ProductDTO[] }) {
   const four = products.slice(0, 4);
 
   return (
-    <section className="relative overflow-hidden bg-slate-900 py-20">
-      <div className="absolute inset-0 bg-black opacity-40" aria-hidden />
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-green-600/20"
-        aria-hidden
-      />
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-black py-20">
+      {/* Corner glow blobs (reference: purple top-left, teal bottom-right) */}
+      <div className="absolute -top-40 -left-20 h-96 w-96 rounded-full bg-purple-600/10 blur-3xl" aria-hidden />
+      <div className="absolute -bottom-40 -right-20 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl" aria-hidden />
+
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 text-center">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-yellow-300">
-            <Zap className="h-3.5 w-3.5" aria-hidden />
-            ⚡ PREMIUM COLLECTION
+          <div className="mb-4 inline-block rounded-full bg-slate-800 px-4 py-2">
+            <span className="bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-sm font-semibold text-transparent">
+              ⚡ PREMIUM COLLECTION
+            </span>
           </div>
-          <h2 className="mb-4 text-3xl font-bold text-white md:text-4xl">
+          <h2 className="mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent md:text-5xl">
             Professional Fitness Gear
           </h2>
-          <p className="mx-auto mb-2 max-w-3xl text-gray-300">
+          <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-400">
             Discover our handpicked selection of premium equipment and supplements,
             trusted by professional athletes and fitness enthusiasts worldwide.
           </p>
@@ -47,7 +48,7 @@ export function ShopPreview({ products }: { products: ProductDTO[] }) {
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/50"
+                  className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-slate-800/50"
                 >
                   <Skeleton className="absolute inset-0 rounded-none bg-slate-700/60" />
                 </div>
@@ -82,35 +83,37 @@ export function ShopPreview({ products }: { products: ProductDTO[] }) {
 function ProductRevealCard({ product, index }: { product: ProductDTO; index: number }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-slate-700 bg-slate-800"
+      className="group relative aspect-[3/4] w-full overflow-hidden rounded-2xl shadow-lg transition-all duration-500 hover:shadow-2xl hover:shadow-blue-500/20"
     >
-      <div className="relative aspect-square overflow-hidden bg-slate-900">
-        <img
-          src={product.imageUrl || FALLBACK_IMAGE}
-          alt={product.name}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-      </div>
-      <div className="relative flex h-full flex-col p-4">
-        <h3 className="mb-2 text-2xl font-bold text-white transition-transform duration-300 ease-out group-hover:-translate-y-20">
+      {/* Full-bleed image */}
+      <img
+        src={product.imageUrl || FALLBACK_IMAGE}
+        alt={product.name}
+        loading="lazy"
+        className="absolute inset-0 h-full w-full object-cover transition-all duration-500 group-hover:scale-110"
+      />
+      {/* Bottom scrim */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent transition-all duration-500 group-hover:from-black/90 group-hover:via-black/50" aria-hidden />
+
+      <div className="relative flex h-full flex-col justify-end p-6 text-white">
+        <h3 className="mb-2 text-2xl font-bold transition-transform duration-300 ease-out group-hover:-translate-y-20">
           {product.name}
         </h3>
         <div className="max-h-0 -translate-y-8 overflow-hidden opacity-0 transition-all duration-300 ease-out group-hover:-translate-y-8 group-hover:max-h-40 group-hover:opacity-100">
-          <span className="mb-3 inline-flex items-center rounded-md border border-slate-600 px-2.5 py-0.5 text-xs font-semibold capitalize text-gray-300">
+          <div className="mb-3 inline-flex items-center rounded-md border border-white/20 bg-white/10 px-2.5 py-0.5 text-xs font-medium capitalize text-white">
             {product.category}
-          </span>
-          <p className="mb-4 text-4xl font-extrabold text-white">${product.price}</p>
+          </div>
+          <p className="mb-4 text-4xl font-extrabold">${product.price}</p>
         </div>
         <Link
           href="/Shop"
-          className="absolute bottom-4 left-4 right-4 translate-y-20 transition-all duration-300 ease-out group-hover:translate-y-0"
+          className="translate-y-20 transition-all duration-300 ease-out group-hover:translate-y-0"
         >
-          <Button className="w-full bg-white/90 font-semibold text-black hover:bg-white">
+          <Button className="h-9 w-full bg-white/90 font-semibold text-black hover:bg-white">
             Shop Now
             <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
           </Button>

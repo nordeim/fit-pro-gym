@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, ShoppingCart, Star } from "lucide-react";
+import { ArrowRight, Check, Crown, ShoppingCart } from "lucide-react";
 
 import {
   useApp,
@@ -21,7 +21,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SpeedLines } from "@/components/ui/speed-lines";
 import { planColors } from "@/components/memberships/membership-card";
+import { MEMBERSHIPS_SPEED_LINES } from "@/lib/speed-lines";
 import { cn } from "@/lib/utils";
 
 const FALLBACK_IMAGE =
@@ -53,8 +55,8 @@ function PlanRailCard({
       )}
     >
       {plan.popular ? (
-        <Badge className="absolute top-6 right-6 rounded-full border-0 bg-gradient-to-r from-blue-500 to-blue-600 px-3 py-1 text-xs font-semibold text-white shadow-lg">
-          <Star className="mr-1 h-4 w-4" aria-hidden />
+        <Badge className="absolute top-6 right-6 mt-10 rounded-full border-0 bg-gradient-to-r from-blue-500 to-blue-600 px-1 py-0.5 text-xs font-semibold text-white shadow-lg">
+          <Crown className="mr-1 h-4 w-4" aria-hidden />
           Most Popular
         </Badge>
       ) : null}
@@ -244,23 +246,9 @@ export function MembershipsPage() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-gray-900">
-      {/* Page hero with speed lines */}
+      {/* Page hero with speed lines (8 — pinned by src/lib/speed-lines.test.ts) */}
       <section className="relative overflow-hidden py-20 text-center text-white md:py-28">
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-800 to-gray-900" aria-hidden />
-        <motion.div
-          aria-hidden
-          className="absolute top-[30%] h-2 w-full bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-90"
-          initial={{ x: "100vw" }}
-          animate={{ x: "-100vw" }}
-          transition={{ duration: 9, delay: 1, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div
-          aria-hidden
-          className="absolute top-[55%] h-2 w-full bg-gradient-to-r from-transparent via-green-300 to-transparent opacity-90"
-          initial={{ x: "100vw" }}
-          animate={{ x: "-100vw" }}
-          transition={{ duration: 11, delay: 2, repeat: Infinity, ease: "linear" }}
-        />
+        <SpeedLines lines={MEMBERSHIPS_SPEED_LINES} />
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <motion.h1
             initial={{ opacity: 0, y: 20 }}

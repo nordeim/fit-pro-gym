@@ -10,8 +10,9 @@
 
 ---
 
-#### Revision Block — v1.0
+#### Revision Block — v1.1
 
+- `[v1.1]` Session-2 parity remediation: hero/memberships speed lines corrected to the reference's 8-line spec (extracted from the live DOM + bundle, pinned by `src/lib/speed-lines.test.ts`); hero gradient canvas + scrim/tint layers; Why-Choose rebuilt (glass cards, users/award/zap/star, scale-in values); Memberships rail badge → Crown at the reference's top-6+mt-10 offset; Shop toolbar → sticky card + 4-col grid + hardcoded Title Case categories (`src/lib/shop-categories.ts`); header logout buttons → `text-xs`; login card/Google button polish; broken Kettlebell seed image replaced; `NEXT_PUBLIC_SITE_URL` wired to `metadataBase`. Tests: 36 unit + 43 e2e (15 new home reference-parity specs).
 - `[CA]` Initial PAD for the completed clone: full recon → implementation → test → documentation cycle.
 - `[SYN]` Domain model mirrored 1:1 from the reference's base44 entity API (`Product`, `Membership`, `CartItem`, `Order`, `User`) — names and shapes preserved for behavioral parity.
 - `[SAN]` Auth secrets, database files, and session states excluded from version control (git-ignored).
@@ -273,7 +274,7 @@ fit-pro-gym/
 │   │   └── utils.ts           # cn · cartTotal (cents) · formatPrice · toOrderLine
 │   └── hooks/                 # (reserved)
 ├── tests/
-│   ├── e2e/                   # global-setup · auth.setup · helpers · 5 spec files (29 specs)
+│   ├── e2e/                   # global-setup · auth.setup · helpers · 6 spec files (43 specs)
 │   └── db-path.test.ts        # resolution contract
 ├── docs/
 │   ├── screenshots/           # current UI captures (desktop + mobile)
@@ -388,10 +389,10 @@ All endpoints return JSON. Mutations require the `fitpro_session` HttpOnly cooki
 
 | Layer | Runner | Scope | Entry |
 |-------|--------|-------|-------|
-| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 25 specs | `bun run test` |
+| Unit | Vitest | `src/lib/*.test.ts`, `tests/db-path.test.ts` — 36 specs (db-path 15 · speed-lines 7 · shop-categories 4 · money+serializers 10) | `bun run test` |
 | Type | `tsc --noEmit` | whole repo | `bun run typecheck` |
 | Lint | ESLint 9 flat config | whole repo (incl. `react-hooks/set-state-in-effect`) | `bun run lint` |
-| E2E | Playwright | 29 specs: auth (5), mobile-navigation (8), shop (5), memberships (5), cart (5) + setup | `bun run build && bun run test:e2e` |
+| E2E | Playwright | 43 specs: auth (6), mobile-navigation (9), home reference-parity (15), shop (6), memberships (6), cart (6) + setup | `bun run build && bun run test:e2e` |
 
 **E2E harness specifics (deliberate):**
 - Boots the **production standalone** build (`bun .next/standalone/server.js`) on :3100 — testing what ships.
@@ -467,12 +468,12 @@ What was measured from the reference (DOM snapshots, computed styles, network tr
 | Surface | Parity elements |
 |---------|-----------------|
 | Header | `sticky top-0 z-50 backdrop-blur-md border-b border-white/10`, h-16, `max-w-7xl` container, gradient `rounded-xl` Dumbbell logo (w-10 h-10), nav icons (House/CreditCard/ShoppingBag), active pill `bg-white/10`, cart badge (`bg-blue-500 border-2 border-gray-800`), avatar initial gradient circle, mobile menu structure + user cluster |
-| Hero | 6 speed lines (colors/heights/durations/delays/blur extracted), gradient `Ultimate` span, CTA pair (`bg-blue-600 px-8 py-4` + outline `bg-white/20 backdrop-blur-sm`), tri-color stats, `aspect-square` gradient-framed image + two glow blobs |
-| Why Choose | 4 stat cards (values, colors, `bg-*/20` + `border-*/30`), cursor spotlight |
+| Hero | Gradient canvas (`from-gray-900 via-gray-800 to-gray-900`) + `bg-black/50` scrim + blue→green tint, 8 speed lines (6 glow w/ blur+shadow + 2 solid via-blue-300/green-300, exact durations/delays in `src/lib/speed-lines.ts`), gradient `Ultimate` span, CTA pair (`bg-blue-600 px-8 py-4` + outline `bg-white/20 backdrop-blur-sm`), tri-color stats, `aspect-square` gradient-framed image + two glow blobs |
+| Why Choose | 4 stat cards (5,000+ / 10+ / 24/7 / 4.9; users/award/zap/star icons; `bg-white/5 backdrop-blur-lg` + colored borders, `-inset-px` 400px cursor spotlight, `from-white/5` sheen, `text-4xl` white scale-in values), section gradient + tint + corner glow blobs |
 | Plan cards (home) | `bg-slate-800/70 backdrop-blur-xl rounded-3xl p-8`, popular badge (`bg-blue-500/90 rounded-full top-6 right-6`), `$X` `text-5xl` + `/mo`, gradient hairline divider, emerald Check list, hover lift −12px |
-| Memberships rail | horizontal scroll, `sm:w-[320px]` cards, `ring-2 ring-blue-500/20` popular, gradient Choose buttons per colorScheme |
+| Memberships rail | horizontal scroll, `sm:w-[320px]` cards, `ring-2 ring-blue-500/50` popular, Crown badge at top-6 + mt-10 (≈65px card offset), gradient Choose buttons per colorScheme, own 8-line animated hero |
 | Cross-sell dialog | `sm:max-w-3xl bg-gray-900/80 backdrop-blur-2xl rounded-3xl border-2`, "Complete Your Setup" + 3 featured products + No Thanks/Go to Cart/Explore Full Store |
-| Shop | search + category + 3-way sort, `bg-slate-800 rounded-2xl` cards, `aspect-square` images, category badge, `rounded-full w-10 h-10 bg-blue-600` add button |
+| Shop | sticky toolbar card (`bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 sticky top-20`, 4-col grid, search `lg:col-span-2`), hardcoded Title Case categories, 3-way sort, `bg-slate-800 rounded-2xl` grid cards, `aspect-square` images, category badge, `rounded-full w-10 h-10 bg-blue-600` add button |
 | Cart | gradient canvas, rows (`bg-white/10 backdrop-blur-sm`), 16×16 image/initial tile, qty steppers (h-8 w-8), summary (Free shipping), checkout form (street/city/state/zip placeholders), `Complete Order - $X` / `Processing Order...` |
 | Login | light card, circular chip (`rounded-full ring-4 ring-white/50`), Google button, OR divider, icon inputs, dark submit |
 | Toasts | exact strings + `bg-{green,red,blue}-500/20` palette, 3s dismiss |

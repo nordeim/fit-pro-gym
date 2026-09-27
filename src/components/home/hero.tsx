@@ -1,44 +1,28 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { SpeedLines } from "@/components/ui/speed-lines";
+import { HERO_SPEED_LINES } from "@/lib/speed-lines";
 
 /**
- * Hero — mirrored from the reference: full-bleed dark section with animated
- * "speed line" streaks (framer-motion, 6 gradients at staggered top offsets),
+ * Hero — mirrored from the reference: full-bleed gradient section
+ * (from-gray-900 via-gray-800 to-gray-900) with a black scrim and a
+ * blue→green tint, 8 animated "speed line" streaks (framer-motion),
  * gradient "Ultimate" headline, dual CTAs, tri-color stats, and the
  * gradient-framed hero image with glow blobs.
  */
 export function Hero() {
-  const reduced = useReducedMotion();
-
-  const lines = [
-    { top: "20%", h: "h-1", gradient: "from-transparent via-cyan-400 to-transparent", opacity: "opacity-60", shadow: "shadow-[0_0_20px_#22d3ee]", blur: "blur(1px)", duration: 12, delay: 0 },
-    { top: "30%", h: "h-2", gradient: "from-transparent via-blue-500 to-transparent", opacity: "opacity-70", shadow: "shadow-[0_0_30px_#3b82f6]", blur: "blur(1.5px)", duration: 9, delay: 1 },
-    { top: "40%", h: "h-1", gradient: "from-transparent via-yellow-400 to-transparent", opacity: "opacity-60", shadow: "shadow-[0_0_25px_#facc15]", blur: "blur(1px)", duration: 15, delay: 0.5 },
-    { top: "55%", h: "h-2", gradient: "from-transparent via-green-400 to-transparent", opacity: "opacity-70", shadow: "shadow-[0_0_35px_#22c55e]", blur: "blur(1.5px)", duration: 11, delay: 2 },
-    { top: "65%", h: "h-1", gradient: "from-transparent via-blue-400 to-transparent", opacity: "opacity-80", shadow: "shadow-[0_0_30px_#60a5fa]", blur: "blur(1px)", duration: 8, delay: 1.5 },
-    { top: "80%", h: "h-1", gradient: "from-transparent via-teal-400 to-transparent", opacity: "opacity-60", shadow: "shadow-[0_0_25px_#2dd4bf]", blur: "blur(1px)", duration: 13, delay: 2.5 },
-  ];
-
   return (
-    <section className="relative overflow-hidden py-24 text-white md:py-32">
-      {/* Animated speed lines */}
-      {lines.map((line, i) => (
-        <motion.div
-          key={i}
-          aria-hidden
-          className={`absolute ${line.top} ${line.h} w-full bg-gradient-to-r ${line.gradient} ${line.opacity} ${line.shadow}`}
-          style={{ filter: line.blur }}
-          initial={reduced ? undefined : { x: "100vw" }}
-          animate={reduced ? undefined : { x: "-100vw" }}
-          transition={{ duration: line.duration, delay: line.delay, repeat: Infinity, ease: "linear" }}
-        />
-      ))}
+    <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 overflow-hidden text-white">
+      {/* Scrim + brand tint under the streaks (reference layer order) */}
+      <div className="absolute inset-0 bg-black opacity-50" aria-hidden />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-green-600/20" aria-hidden />
+
+      {/* Animated speed lines (8 — pinned by src/lib/speed-lines.test.ts) */}
+      <SpeedLines lines={HERO_SPEED_LINES} />
 
       <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 md:py-32 lg:px-8">
         <div className="grid items-center gap-12 lg:grid-cols-2">

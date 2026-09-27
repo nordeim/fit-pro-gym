@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { categoryMatches, SHOP_CATEGORIES } from "@/lib/shop-categories";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80";
@@ -88,7 +89,7 @@ export function ProductCard({
         <div className="space-y-2">
           <Badge
             variant="outline"
-            className="border-slate-600 text-gray-300 capitalize"
+            className="border-slate-600 px-2.5 font-semibold text-gray-300 capitalize"
           >
             {product.category}
           </Badge>
@@ -124,17 +125,17 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
   const [sort, setSort] = React.useState<SortKey>("name");
   const [loading] = React.useState(false);
 
-  const categories = React.useMemo(() => {
-    const set = new Set(products.map((p) => p.category.toLowerCase()));
-    return ["all", ...Array.from(set).sort()];
-  }, [products]);
+  const categories = React.useMemo(
+    () => ["all", ...SHOP_CATEGORIES] as const,
+    []
+  );
 
   const visible = React.useMemo(() => {
     let list = products.filter((p) => {
       const matchesQuery = p.name
         .toLowerCase()
         .includes(query.trim().toLowerCase());
-      const matchesCategory = category === "all" || p.category.toLowerCase() === category;
+      const matchesCategory = categoryMatches(p.category, category);
       return matchesQuery && matchesCategory;
     });
     switch (sort) {
@@ -162,33 +163,33 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="relative max-w-md flex-1">
-            <Search
-              className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
-              aria-hidden
-            />
-            <Input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products by name..."
-              aria-label="Search products by name"
-              className="h-11 border-slate-700 bg-slate-800 pl-10 text-white placeholder:text-gray-400 focus:border-slate-500"
-            />
-          </div>
-          <div className="flex items-center gap-3">
+        {/* Filters — sticky toolbar card under the header (reference parity) */}
+        <div className="sticky top-20 z-40 mb-8 rounded-2xl border border-slate-700 bg-slate-800/80 p-4 backdrop-blur-sm">
+          <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="relative lg:col-span-2">
+              <Search
+                className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400"
+                aria-hidden
+              />
+              <Input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search products by name..."
+                aria-label="Search products by name"
+                className="h-9 border-slate-600 bg-slate-700 pl-10 text-white placeholder:text-gray-400 focus:border-slate-500"
+              />
+            </div>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger
                 aria-label="Filter by category"
-                className="h-11 w-[180px] border-slate-700 bg-slate-800 text-white"
+                className="h-9 w-full border-slate-600 bg-slate-700 text-white"
               >
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent className="border-slate-700 bg-slate-800 text-white">
                 {categories.map((c) => (
-                  <SelectItem key={c} value={c} className="capitalize">
+                  <SelectItem key={c} value={c}>
                     {c === "all" ? "All Categories" : c}
                   </SelectItem>
                 ))}
@@ -197,7 +198,7 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
               <SelectTrigger
                 aria-label="Sort products"
-                className="h-11 w-[190px] border-slate-700 bg-slate-800 text-white"
+                className="h-9 w-full border-slate-600 bg-slate-700 text-white"
               >
                 <SelectValue placeholder="Name (A-Z)" />
               </SelectTrigger>

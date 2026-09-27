@@ -180,7 +180,7 @@ async function main() {
       price: 89,
       category: "equipment",
       imageUrl:
-        "https://images.unsplash.com/photo-1517963879433-6ad2b058d838?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+        "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       stockQuantity: 25,
       featured: false,
     },

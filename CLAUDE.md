@@ -57,14 +57,14 @@ Guidance for Claude Code when working in this repository. Read `AGENTS.md` for t
 ### UI / UX parity
 
 - The header, footer, hero, plan cards, product cards, cart rows, checkout form, and login card are **pixel-matched to the reference** (markup classes were extracted from the live app's bundle). Changes to these files should preserve the extracted classnames or have an explicit reason.
-- framer-motion entrance/hover animations mirror the reference (staggered `delay: index * 0.1`, `whileHover: { y: -12 }`, speed lines with specific durations 12/9/15/11/8/13s). `useReducedMotion` guards exist — keep them.
-- Icons: lucide-react, matched 1:1 to the reference (Home=House, Memberships=CreditCard, Shop=ShoppingBag, cart=ShoppingCart, logo=Dumbbell, features=Check, popular=Star).
+- framer-motion entrance/hover animations mirror the reference (staggered `delay: index * 0.1`, `whileHover: { y: -12 }`, 8 speed lines per hero with the exact durations/delays in `src/lib/speed-lines.ts`). `useReducedMotion` guards exist — keep them.
+- Icons: lucide-react, matched 1:1 to the reference (Home=House, Memberships=CreditCard, Shop=ShoppingBag, cart=ShoppingCart, logo=Dumbbell, features=Check, popular=Star on the HOME plan card, popular=Crown on the MEMBERSHIPS rail card, why-choose stats=Users/Award/Zap/Star).
 - Images: the reference's Unsplash URLs are part of the seed data. Use `<img>` (not next/image) for parity with the reference — the repo's ESLint does not flag it.
 
 ## Testing
 
-- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts`. Run: `bun run test`.
-- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `shop`, `memberships`, `cart`.
+- **Unit (Vitest):** pure seams only — `src/lib/*.test.ts` + `tests/db-path.test.ts` (36 specs: db-path, speed-lines, shop-categories, money, serializers). Run: `bun run test`.
+- **E2E (Playwright):** `bun run build && bun run test:e2e`. Production standalone server on :3100 with isolated `db/e2e.db` (global-setup pushes + seeds). Spec files: `auth`, `mobile-navigation`, `home` (reference-parity surfaces), `shop`, `memberships`, `cart` — 43 specs total.
 - **Always test through the API when arranging state** in specs (`page.request.get/post/delete`) — the UI flow is the thing under test.
 - New e2e specs join the main project and inherit the authenticated storageState; only `auth.spec.ts` opts out.
 

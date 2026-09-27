@@ -54,3 +54,56 @@ Work Log:
 
 Stage Summary:
 - DELIVERED: complete clone pushed to git@github.com:nordeim/fit-pro-gym.git (main @ 3501bcd). Dev server healthy on :3000; demo login demo@fitpro.app / Demo1234!.
+
+---
+Task ID: 4
+Agent: Super Z (main, session 2)
+Task: Refresh workspace, review docs, re-audit parity vs live target, produce remediation plan
+
+Work Log:
+- Workspace reset detected: re-cloned github.com/nordeim/fit-pro-gym (main @ 3501bcd) to /home/z/my-project/fit-pro-gym; copied seeded db/custom.db + db/e2e.db from the session-1 checkout; bun install; prisma generate.
+- Read AGENTS.md, CLAUDE.md, README.md, Project_Architecture_Document.md, docs/session_1.md, worklog.md — codebase matches documentation (baseline gates green: lint, typecheck, 25/25 unit).
+- Dev-server hardening: sandbox reaps processes started in a tool call; fixed with double-fork daemonization (( setsid CMD & ) &). Also hit the documented DATABASE_URL hijack (sandbox exports absolute file:/home/z/my-project/db/custom.db which beats .env) — dev server must be started with DATABASE_URL="file:../db/custom.db" prefixed.
+- Logged into the live target (sepnetflix2023@outlook.com), audited every page via DOM class diffs + VLM screenshot comparison. Verified: mobile menu behavior (open/close on route change, active pill semantics incl. no-active-on-/), hero headline, product cards, sort options, cart empty state, footer, avatar, hamburger — all match.
+- Found 14 parity defects (remediation R1-R11):
+  R1 speed lines: home hero renders 8 lines in the reference (6 glow + 2 solid via-blue-300/green-300 op-90) — clone renders 6; memberships hero renders its OWN 8 (tops 15/25/35/50/60/75 + solids at 25/50, durations 10/8/12/9/7/11 + 8/9) — clone renders 2 misplaced ones. Full specs extracted from the live DOM + bundle.
+  R2 hero section missing bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 + bg-black/50 overlay + blue-green tint overlay; section py must move to inner (target has no section py).
+  R3 Why-Choose: section gradient from-slate-900 via-slate-800 + tint overlay + 2 glow blobs; cards bg-white/5 backdrop-blur-lg p-8 with -inset-px spotlight + from-white/5 overlay; icons users/award/zap/star w-8 h-8 (clone: ThumbsUp/Trophy/Clock); values text-4xl white with count-up; labels text-gray-300 font-medium.
+  R4 PlansPreview: section bg-slate-900 (not gray-900); header mb-16; p max-w-2xl mx-auto mb-8; badge = gradient pill "🚀 Limited Time: Save 20% on Annual Plans" (clone: orange Zap chip).
+  R5 ShopPreview: section bg-gradient-to-b from-slate-900 to-black + purple/teal glow blobs (clone has hero's overlays instead); badge bg-slate-800 pill w/ gradient text; h2 gradient text md:text-5xl; cards: full-bleed absolute image + from-black/80 overlay + justify-end p-6 (clone: aspect-square img + below-content).
+  R6 Memberships rail badge icon = Crown w-4 h-4 (clone: Star); page hero: remove clone's from-gray-800 bg overlay div.
+  R7 Shop toolbar: needs container bg-slate-800/80 backdrop-blur-sm border-slate-700 rounded-2xl p-4 mb-8 sticky top-20 z-40 + grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 (search lg:col-span-2); inputs h-9 bg-slate-700 border-slate-600; search icon w-5; category dropdown = hardcoded Title Case (All Categories, Equipment, Supplements, Accessories, Apparel) — clone derives lowercase from data.
+  R8 Header logout buttons (desktop + mobile) need text-xs (target) — clone text-sm.
+  R9 Login: card bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl; Google button rounded-xl border-slate-200 px-5 py-3.5 gap-3 hover:shadow-sm. Shop product badge px-2.5 font-semibold.
+  R10 Seed: Kettlebell image photo-1517963879433-6ad2b058d838 404s → replace with photo-1517836357463-d25dfeac3438 (verified 200). Target's "XSS-INJECT-TEST" junk row deliberately not cloned.
+  R11 e2e: add tests/e2e/home.spec.ts pinning the parity surfaces.
+- Target data drift noted: catalog pruned to 5 products (4 legit + injected XSS test row); clone's 8-product seed retained (superset incl. 4 non-featured).
+
+Stage Summary:
+- Baseline green; 14 defects catalogued with exact reference specs. Executing remediation R1-R16 with TDD (unit tests for speed-lines/count-up/category constants first), then gates, screenshots, docs, fit-pro-gym_SKILL.md, SSH push.
+
+---
+Task ID: 5
+Agent: Super Z (main, session 2)
+Task: Execute parity remediation R1-R16 (TDD)
+
+Work Log:
+- R1 TDD: src/lib/speed-lines.test.ts (7 specs, RED first) → src/lib/speed-lines.ts with HERO_SPEED_LINES (8: 20/30/40/55/65/80 glow + 30/55 solid) + MEMBERSHIPS_SPEED_LINES (8: 15/25/35/50/60/75 + 25/50) → shared src/components/ui/speed-lines.tsx (framer x 100vw→-100vw, reduced-motion aware, complete class strings for the Tailwind v4 static scanner).
+- R1b TDD: src/lib/shop-categories.test.ts (4 specs) → SHOP_CATEGORIES = [Equipment, Supplements, Accessories, Apparel] + case-insensitive categoryMatches.
+- R2 hero.tsx: section → bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 (py moved to inner, which already had it) + bg-black/50 scrim + from-blue-600/20 to-green-600/20 tint + SpeedLines(HERO).
+- R3 why-choose.tsx rebuilt: gradient section + tint + corner blobs; glass cards bg-white/5 backdrop-blur-lg border-{c}-500/30 p-8 with -inset-px 400px spotlight + from-white/5 sheen; icons users/award/zap/star (w-8 h-8 in w-16 h-16 boxes); values text-4xl white with scale 0.8→1 entrance; labels text-gray-300 font-medium.
+- R4 plans-preview.tsx: section bg-slate-900; header mb-16; p max-w-2xl mx-auto mb-8; badge → gradient pill "🚀 Limited Time: Save 20% on Annual Plans" (removed orange Zap chip).
+- R5 shop-preview.tsx: section bg-gradient-to-b from-slate-900 to-black + purple/teal blobs (removed hero's black/40 + tint that were misplaced here); badge → bg-slate-800 pill with gradient text; h2 → gradient text md:text-5xl; cards → full-bleed absolute images + from-black/80 scrim + justify-end p-6 content.
+- R6 memberships-page.tsx: removed from-gray-800 bg overlay div; SpeedLines(MEMBERSHIPS); rail badge Star → Crown; badge offset fixed to top-6 + mt-10 (65px, measured from the live reference) with px-1 py-0.5.
+- R7 shop-page.tsx: toolbar → sticky top-20 z-40 card (bg-slate-800/80 backdrop-blur-sm border-slate-700 rounded-2xl p-4) with grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4, search lg:col-span-2, inputs h-9 bg-slate-700 border-slate-600, search icon h-5 w-5; categories → SHOP_CATEGORIES (Title Case); product badge px-2.5 font-semibold.
+- R8 header.tsx: both logout buttons → h-8 px-3 text-xs (desktop + mobile).
+- R9 auth-form.tsx: card → bg-white/95 backdrop-blur-sm shadow-2xl (relative overflow-hidden border-0); Google button → rounded-xl border-slate-200 px-5 py-3.5 gap-3 hover:shadow-sm.
+- R10 seed.ts: Kettlebell image photo-1517963879433-6ad2b058d838 (404) → photo-1517836357463-d25dfeac3438 (verified 200); re-pushed + re-seeded dev DB.
+- R11 tests/e2e/home.spec.ts (15 specs): hero gradient/scrim/tint/8-lines/blur-count, headline/CTAs/stats, why-choose gradient+blobs+icons+values+labels, plans pill, shop-preview canvas/badge/gradient-heading/full-bleed cards, memberships 8-lines + Crown + mt-10, shop toolbar sticky/grid/h-9/Title Case categories + filter matching + logout text-xs. Fixed 2 spec bugs (regex + quantifier, CSS escape).
+- R13 screenshots retaken: home/memberships/shop/cart × desktop+mobile, mobile-menu-open, login, + NEW cross-sell-dialog.png (11 captures, populated 3-item cart).
+- R13b .env/.env.example: added shell-env hijack warning note; wired NEXT_PUBLIC_SITE_URL → metadataBase in layout.tsx (was documented but unreferenced).
+- R14 docs updated: README (features/screenshots/counts), AGENTS (pinned-contract gotcha, counts), CLAUDE (icons/framer/testing), PAD (v1.1 revision block, parity ledger, counts, env).
+- Gates: lint ✓, typecheck ✓, unit 36/36 ✓, build ✓, e2e 43/43 ✓. Badge offset verified 65px == reference; speed-line computed tops verified 20-80%.
+
+Stage Summary:
+- Parity remediation complete: 14 defects fixed, 2 new contract modules with 11 pinning unit tests, 15 new e2e parity specs, 11 screenshots. Next: fit-pro-gym_SKILL.md, commit + SSH push.
