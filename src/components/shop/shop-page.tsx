@@ -85,7 +85,7 @@ export function ProductCard({
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
-      <div className="flex-grow p-4">
+      <div className="flex flex-col justify-between p-4 flex-grow">
         <div className="space-y-2">
           <Badge
             variant="outline"
@@ -213,8 +213,8 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
 
         {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
                 className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-800"
@@ -229,15 +229,17 @@ export function ShopPage({ products }: { products: ProductDTO[] }) {
             ))}
           </div>
         ) : visible.length === 0 ? (
-          <div className="py-16 text-center">
-            <Search className="mx-auto mb-4 h-12 w-12 text-gray-500" aria-hidden />
-            <h3 className="mb-2 text-xl font-semibold text-white">No products found</h3>
-            <p className="text-gray-400">
-              Try adjusting your search or filter to find what you are looking for.
+          // SESSION-6 PARITY FIX (S6-R2): the reference renders a single
+          // centered paragraph — no icon, no heading (extracted from its DOM:
+          // <div class="text-center py-24"><p class="text-gray-400 text-lg">
+          // No products found matching your criteria.</p></div>)
+          <div className="text-center py-24">
+            <p className="text-gray-400 text-lg">
+              No products found matching your criteria.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {visible.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}

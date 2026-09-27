@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.3.0
+version: 1.4.0
 last_updated: 2026-09-27
-project_state: 47 unit tests + 58 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 5 — home preview hardcoded middle card, seed dates mirror the reference's real entity dates)
+project_state: 47 unit tests + 64 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 6 — catalog = the reference's real 4 products, shop card geometry/gap/empty-state, cross-sell card radius, native rail scrollbar)
 tags:
   - nextjs
   - tailwind-v4
@@ -284,7 +284,7 @@ lists); parsing happens ONLY in `src/lib/serialize.ts`.
 |--------|------|-------|
 | User | 1 | `demo@fitpro.app` / `Demo1234!` |
 | MembershipPlan | 4 | Starter $29 (orange), Basic Fit $39 (blue), Pro Athlete $59 (green, popular — 6 features incl. Recovery room access), Family Pack $149 (purple). Fixed `PLAN_CREATED` dates mirror the reference's real entity dates (two tie groups: 2025-07-01 / 2025-07-30) |
-| Product | 8 | 4 featured + 4 non-featured; reference Unsplash URLs (all verified 200). 200ms `createdAt` stagger pins the featured `-created_date` order [Pre-Workout, Yoga Mat, Dumbbells, Whey] |
+| Product | 4 | The reference's REAL entity data (all featured): Pre-Workout Energy $34 (supplements), Yoga Mat Premium $79 (accessories), Professional Dumbbells Set $299 (equipment), Whey Protein Powder $49 (supplements). 200ms `createdAt` stagger pins the featured `-created_date` order [Pre-Workout, Yoga Mat, Dumbbells, Whey]. Session-6 removed 4 invented demo rows that never existed on the reference |
 
 Run: `DATABASE_URL="file:../db/custom.db" bun run db:seed` (the prefix guards
 against shell-env hijack). The reference's injected "XSS-INJECT-TEST" junk row
@@ -348,6 +348,9 @@ is deliberately not cloned.
 | E2E 429 on login | Per-test logins tripped the rate limiter | storageState project; keep real logins < 10/15 min |
 | Menu won't close after navigation | Effect-based close was refactored to something async | Render-time prev-pathname adjustment in `header.tsx` |
 | Icons look subtly "newer" than the reference | lucide-react drifted past 0.475.0 | `bun install` with the pin restored; check `tests/e2e/icons.spec.ts` path data |
+| Icons specs fail with 0.5xx path data while unit tests stay green | node_modules out of sync with bun.lock after a workspace re-clone (observed: 0.525.0 installed vs 0.475.0 pinned) | `grep version node_modules/lucide-react/package.json` → `rm -rf node_modules/lucide-react && bun install --frozen-lockfile` → REBUILD before e2e (the standalone bundle compiles whatever is in node_modules) |
+| Shop price rows float above the card bottom on rows with a 2-line product name | Card body lost `flex flex-col justify-between` | e2e "product cards pin price rows" spec pins the 16px row gap; restore the reference body classes |
+| "Apparel" category filter shows a card | An invented product reintroduced (the reference's real catalog has NO apparel products) | The seed is the reference's exact 4-product entity data; "Apparel" must hit the reference's single-paragraph empty state |
 | Home preview cards in the wrong order | Seed `createdAt` values tied at the same millisecond | Re-seed (fixed dates); verify `ORDER BY createdAt DESC` |
 | Home Pro card shows six features / missing "Premium equipment access" | The preview is rendering the ENTITY row instead of the hardcoded card | `homePlanSlots` (src/lib/home-featured-plan.ts) replaces the middle slot — don't bypass it |
 | Login error text mismatch | API copy diverged from the reference's alert | The string is "Invalid email or password" — pinned by `auth.spec.ts` |
@@ -364,7 +367,7 @@ bun run lint          # clean
 bun run typecheck     # clean
 bun run test          # 47/47
 bun run build         # standalone compiles
-bun run test:e2e      # 58/58
+bun run test:e2e      # 64/64
 ```
 
 Then the human-pass list:

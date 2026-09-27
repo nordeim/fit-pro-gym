@@ -105,3 +105,20 @@ Work Log:
 
 Stage Summary:
 - Session 5 delivered: home-preview hardcoded middle card + deterministic seed ordering (3 defects fixed, 7 unit + 1 new e2e spec, 2 specs strengthened); all gates green; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
+
+---
+Task ID: 9
+Agent: Super Z (main, session 6)
+Task: Session-6 cycle: refresh, re-audit live target (mobile menu first), remediate new parity defects (TDD), screenshots, docs, push to main
+
+Work Log:
+- Pulled the user's 5298686 (docs/session_7.md progressive log + prompt-to-review-2.md); re-reviewed all root docs; validated codebase (47/47 unit on arrival; local db/custom.db was stale session-1-era — re-seeded with the fixed-date seed; dev server restarted on the canonical repo with the DATABASE_URL prefix).
+- Audited the live target: mobile menu re-verified end-to-end on both sites (identical behavior, no Tailwind v4 issues); entity API re-queried (products/memberships unchanged); discovered the target's cart writes now fail silently (POST 200, no persistence) — target-side base44 regression, documented.
+- Found 7 root defects: (S6-R1) seed carried 4 invented products vs the reference's real 4-product entity data; (S6-R2) shop empty-state markup/copy mismatch; (S6-R3) product-card body missing flex-col justify-between (price rows floated 28px); (S6-R4/R5) shop + home-preview grids gap-6 vs reference gap-8 (preview also had stray pb-4); (S6-R6) cross-sell card rounded-2xl vs reference rounded-xl + transition-opacity vs transition-transform; (S6-R7) rail scrollbar hidden vs reference native.
+- Ops: node_modules/lucide-react had drifted to 0.525.0 against the 0.475.0 lockfile pin (re-clone never re-synced) — icons e2e specs caught it; fixed via bun install --frozen-lockfile + rebuild; documented in AGENTS/SKILL.
+- TDD: 6 new e2e specs + strengthened shop specs written RED-first; implemented seed trim, empty-state swap, card-body justify-between, gap-8 grids, cross-sell rounded-xl + transition-transform, rail scrollbar-hidden removal (+ utility deleted from globals.css).
+- Gates: lint ✓ typecheck ✓ unit 47/47 ✓ build ✓ e2e 64/64 ✓. Live DOM re-measurement confirms parity (4 cards, price rows 21px from bottom on every card, gap 32px); VLM shop comparison MATCH modulo the documented junk-row exclusion + demo cart badge.
+- 12 screenshots re-captured in docs/screenshots/; docs updated (README, AGENTS, CLAUDE, PAD v1.4, SKILL v1.4.0, new docs/session_8.md); committed on main and pushed via docs/ssh_git_wrapper_v3.py (fingerprint-verified key, dry-run then real push, remote ref verified, key shredded).
+
+Stage Summary:
+- Session 6 delivered: real-catalog correction + shop geometry/empty-state/cross-sell/rail-scrollbar parity (7 defects, +6 e2e specs); all gates green; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.

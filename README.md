@@ -21,7 +21,7 @@ FitPro GYM App is the digital front desk of a premium gym: it markets the brand 
 |---------|-------------|
 | 🏠 **Animated landing page** | Hero on a full gradient canvas (from-gray-900 via-gray-800 with black scrim + blue→green tint) and **eight** framer-motion neon "speed lines" (6 blurred glow streaks + 2 solid via-blue-300/green-300), gradient "Ultimate" headline, tri-color stats (5000+ / 24/7 / 50+), gradient-framed hero image with glow blobs, "Why Choose" glass stat cards (users/award/zap/star icons, scale-in values), plan preview with the popular plan pinned center + gradient promo pill, hover-reveal full-bleed shop cards, and the closing CTA band |
 | 💳 **Membership plans** | Four seeded tiers (Starter $29, Basic Fit $39, Pro Athlete $59 — *Most Popular* (Crown badge), Family Pack $149) with per-tier color schemes (blue/green/purple/orange gradients), a horizontally-scrolling plan rail sorted by price, its own 8-line animated hero, and feature checklists |
-| 🛒 **Premium fitness store** | Product grid with category badges, live search, hardcoded Title Case category filter (Equipment / Supplements / Accessories / Apparel — reference parity), and 3-way sort (name / price ↑ / price ↓) in a **sticky toolbar card**; round blue add-to-cart buttons with optimistic disabled states |
+| 🛒 **Premium fitness store** | Product grid with the reference's exact 4-product catalog (Pre-Workout Energy, Yoga Mat Premium, Professional Dumbbells Set, Whey Protein Powder), category badges, live search, hardcoded Title Case category filter (Equipment / Supplements / Accessories / Apparel — reference parity), 3-way sort (name / price ↑ / price ↓) in a **sticky toolbar card**, price rows pinned to the card bottom (reference `justify-between`), `gap-8` grid spacing, the reference's plain centered empty state ("No products found matching your criteria."), and round blue add-to-cart buttons with optimistic disabled states |
 | 🧺 **Server-truth cart** | Per-user cart lines with quantity steppers (minus disabled at 1), item-type badges, image-fallback initial tiles, live order summary (subtotal / free shipping / total), and the reference's app-level dedupe — re-adding an existing line bumps quantity with distinct toast copy |
 | ✨ **Cross-sell dialog** | Choosing a membership opens "Complete Your Setup" — featured products with one-tap add, "No, Thanks", "Go to Cart", and "Explore Full Store" actions |
 | 📦 **Checkout & orders** | Shipping-address form (street / city / state / ZIP, submit disabled until complete), order placement re-verified server-side against DB prices in a transaction, cart cleared atomically, success toast, and redirect home |
@@ -123,7 +123,7 @@ bun install            # or: npm install
 
 # 2. Create the database + demo data
 bun run db:push        # prisma db push (creates db/custom.db)
-bun run db:seed        # demo user, 4 plans, 8 products
+bun run db:seed        # demo user, 4 plans, 4 products (the reference's real catalog)
 
 # 3. Start dev
 bun run dev            # http://localhost:3000
@@ -173,7 +173,7 @@ bun run typecheck     # tsc --noEmit
 bun run lint          # eslint .
 
 # E2E (Playwright): builds the standalone server, boots it on :3100 with an
-# isolated db/e2e.db, signs the demo user in once (storageState), 58 specs.
+# isolated db/e2e.db, signs the demo user in once (storageState), 64 specs.
 bun run build         # prerequisite: the standalone server must exist
 bun run test:e2e
 ```
@@ -229,7 +229,7 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 | Recon & design extraction | ✅ Complete | Reference app audited (DOM, bundle, entity API, VLM) — exact tokens/markup captured |
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
 | Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) |
-| Test suites | ✅ Complete | 47 unit + 58 e2e (incl. 17 home reference-parity specs + 5 icon-geometry/404 pins), all green; lint + typecheck clean |
+| Test suites | ✅ Complete | 47 unit + 64 e2e (incl. 17 home reference-parity specs + icon-geometry/404 pins + shop card geometry/gap/empty-state pins), all green; lint + typecheck clean |
 | Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md |
 
 ## License

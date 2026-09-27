@@ -43,7 +43,10 @@ export function ShopPreview({ products }: { products: ProductDTO[] }) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 pb-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* SESSION-6 PARITY FIX (S6-R5): the reference's preview grid is
+            gap-8 with NO pb-4 (extracted: grid grid-cols-1 sm:grid-cols-2
+            lg:grid-cols-4 gap-8) */}
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {four.length === 0
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div

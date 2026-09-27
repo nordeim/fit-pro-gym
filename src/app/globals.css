@@ -172,12 +172,3 @@
     scroll-behavior: auto !important;
   }
 }
-
-/* Hide scrollbar on the horizontal plan-card rail while keeping scroll */
-.scrollbar-hidden {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-hidden::-webkit-scrollbar {
-  display: none;
-}

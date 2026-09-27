@@ -172,47 +172,17 @@ async function main() {
       stockQuantity: 50,
       featured: true,
     },
-    {
-      name: "Resistance Bands Set",
-      description: "Complete set of resistance bands for strength training",
-      price: 24,
-      category: "accessories",
-      imageUrl:
-        "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      stockQuantity: 40,
-      featured: false,
-    },
-    {
-      name: "Smart Fitness Watch",
-      description: "Track your workouts, heart rate, and recovery metrics",
-      price: 199,
-      category: "equipment",
-      imageUrl:
-        "https://images.unsplash.com/photo-1524805444758-089113d48a6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      stockQuantity: 20,
-      featured: false,
-    },
-    {
-      name: "Kettlebell Cast Iron 16kg",
-      description: "Durable cast iron kettlebell for functional training",
-      price: 89,
-      category: "equipment",
-      imageUrl:
-        "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      stockQuantity: 25,
-      featured: false,
-    },
-    {
-      name: "Gym Duffel Bag",
-      description: "Spacious water-resistant duffel for all your gear",
-      price: 59,
-      category: "apparel",
-      imageUrl:
-        "https://images.unsplash.com/photo-1547949003-9792a18a2601?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
-      stockQuantity: 28,
-      featured: false,
-    },
   ];
+
+  // SESSION-6 PARITY FIX (S6-R1): the catalog is the reference's REAL entity
+  // data, fetched live from its base44 entity API — exactly FOUR products
+  // (Pre-Workout Energy / Yoga Mat Premium / Professional Dumbbells Set /
+  // Whey Protein Powder, all featured). The four extra demo rows this seed
+  // used to carry (Resistance Bands Set / Smart Fitness Watch / Kettlebell
+  // Cast Iron 16kg / Gym Duffel Bag) never existed on the reference and
+  // made the Shop grid render 8 cards against the reference's 4 real ones.
+  // (The reference's injected "XSS-INJECT-TEST" junk row remains
+  // deliberately absent — data-hygiene stance.)
 
   // The reference's four original featured products share ONE timestamp
   // (2025-07-01T14:15:08.553Z); its -created_date tie order renders
@@ -227,7 +197,7 @@ async function main() {
     await db.product.create({ data: { ...product, createdAt: productCreated(i) } });
   }
 
-  console.log("Seeded FitPro demo data: 1 user, 4 membership plans, 8 products.");
+  console.log("Seeded FitPro demo data: 1 user, 4 membership plans, 4 products.");
 }
 
 main()

@@ -158,6 +158,16 @@ test.describe("plans preview + shop preview (reference parity)", () => {
     await expect(names.nth(3)).toHaveText("Whey Protein Powder");
   });
 
+  test("shop preview grid uses the reference's gap-8 spacing", async ({ page }) => {
+    // Reference: grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8
+    // (no pb-4 on the grid — the section owns its bottom spacing)
+    const section = page.locator('section:has(h2:has-text("Professional Fitness Gear"))');
+    const grid = section.locator("div.grid").first();
+    await expect(grid).toHaveClass(/gap-8/);
+    await expect(grid).not.toHaveClass(/gap-6/);
+    await expect(grid).not.toHaveClass(/pb-4/);
+  });
+
   test("shop preview: to-black canvas, premium badge, gradient heading", async ({ page }) => {
     const section = page.locator('section:has(h2:has-text("Professional Fitness Gear"))');
     await expect(section).toHaveClass(/bg-gradient-to-b/);

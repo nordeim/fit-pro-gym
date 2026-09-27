@@ -126,4 +126,39 @@ test.describe("memberships route", () => {
     await page.getByRole("button", { name: "No, Thanks" }).click();
     await expect(page.getByRole("dialog")).toBeHidden();
   });
+
+  test("cross-sell product cards use the reference's rounded-xl + transform transitions", async ({
+    page,
+  }) => {
+    // Reference card: rounded-xl (NOT the grid card's rounded-2xl) and the
+    // image transitions via transition-transform (its hover opacity change
+    // is instant — no transition-opacity utility in the reference markup).
+    const items = (await (await page.request.get("/api/cart")).json()) as Array<{ id: string }>;
+    for (const item of items) {
+      await page.request.delete(`/api/cart/${item.id}`);
+    }
+    await page.goto("/Memberships");
+    await page.getByRole("button", { name: "Choose Pro Athlete" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15_000 });
+
+    const grid = dialog.locator("div.grid").first();
+    const card = grid.locator("div.group").first();
+    await expect(card).toHaveClass(/rounded-xl/);
+    await expect(card).not.toHaveClass(/rounded-2xl/);
+
+    const img = card.locator("img");
+    await expect(img).toHaveClass(/transition-transform/);
+    await expect(img).not.toHaveClass(/transition-opacity/);
+  });
+
+  test("the plan rail keeps the browser's native scrollbar (reference parity)", async ({ page }) => {
+    // Reference rail: flex overflow-x-auto space-x-8 pb-8 -mx-4 px-4 — no
+    // scrollbar hiding of any kind. The clone previously applied a
+    // .scrollbar-hidden utility (scrollbar-width: none), diverging from the
+    // reference on platforms with classic scrollbars.
+    const rail = page.locator("main div.overflow-x-auto").first();
+    await expect(rail).toBeVisible();
+    await expect(rail).not.toHaveClass(/scrollbar-hidden/);
+  });
 });

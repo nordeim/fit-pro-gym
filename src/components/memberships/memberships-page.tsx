@@ -139,13 +139,17 @@ function CrossSellCard({
   };
 
   return (
-    <div className="group overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-white shadow-md backdrop-blur-lg transition-all duration-300 hover:border-white/20">
+    // SESSION-6 PARITY FIX (S6-R6): the reference's cross-sell card is
+    // rounded-xl (the Shop grid card is the one that is rounded-2xl) and
+    // its image transitions via transition-transform (the hover opacity
+    // swap is instant — extracted from its DOM).
+    <div className="group overflow-hidden rounded-xl border border-white/10 bg-white/10 text-white shadow-md backdrop-blur-lg transition-all duration-300 hover:border-white/20">
       <div className="relative aspect-square overflow-hidden bg-gray-900/50">
         <img
           src={product.imageUrl || FALLBACK_IMAGE}
           alt={product.name}
           loading="lazy"
-          className="h-full w-full object-cover opacity-80 transition-opacity duration-300 group-hover:scale-105 group-hover:opacity-100"
+          className="h-full w-full object-cover opacity-80 transition-transform duration-300 group-hover:scale-105 group-hover:opacity-100"
         />
       </div>
       <div className="p-4">
@@ -294,7 +298,10 @@ export function MembershipsPage() {
               ))}
             </div>
           ) : (
-            <div className="scrollbar-hidden -mx-4 flex space-x-8 overflow-x-auto px-4 pb-8">
+            // SESSION-6 PARITY FIX (S6-R7): the reference does NOT hide the
+            // rail's scrollbar (its rail is a plain overflow-x-auto flex
+            // row) — the browser's native scrollbar stays visible.
+            <div className="-mx-4 flex space-x-8 overflow-x-auto px-4 pb-8">
               {sorted.map((plan, index) => (
                 <PlanRailCard
                   key={plan.id}
