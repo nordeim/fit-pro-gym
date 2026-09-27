@@ -89,3 +89,19 @@ Work Log:
 
 Stage Summary:
 - Session 3+4 delivered: 9 parity defects fixed (R1 lucide version pin, R2 Choose icon, R3 login no-redirect, R4 login card, R5 /signup 404, R6 branded 404, R7 titles, R8 font stack, R9+R10 spec/home-order parity); all gates green; docs + session_4 log complete; pushed to git@github.com:nordeim/fit-pro-gym.git main.
+
+---
+Task ID: 8
+Agent: Super Z (main, session 5)
+Task: Session-5 cycle: refresh, re-audit live target, remediate new parity defects (TDD), screenshots, docs, push to main
+
+Work Log:
+- Pulled the user's 2202c52 (docs/session_5.md = the interrupted session-3 log; worklog trimmed). Baseline gates green on arrival; dev server (double-forked) healthy with the correct DATABASE_URL.
+- Re-audited the live target (saved auth state): mobile menu verified end-to-end (hamburger/X swap, structure, route-change close, active pill) — no Tailwind v4 issues; VLM comparisons over 5 pages MATCH; entity API queried directly for ground truth (products all share 2025-07-01T14:15:08.553Z; memberships in two date groups 2025-07-01 / 2025-07-30); network log + JS bundle read for exact query/algorithm semantics.
+- Found 3 root defects: (S5-R1) the reference's home plan preview renders [e[0], HARDCODED-Pro, e[1]] — a hardcoded Pro Athlete with 5 design features incl. "Premium equipment access" (not the entity's 6), blue scheme, Star badge, third entity discarded; (S5-R2) product seed createdAt millisecond ties flip the featured -created_date order (reference tie order: [Pre-Workout, Yoga, Dumbbells, Whey]); (S5-R2b) plan seed stagger had the wrong relative order vs the reference's real entity dates.
+- TDD: src/lib/home-featured-plan.ts (+7 unit specs) and updated home/memberships e2e specs written RED-first; implemented homePlanSlots in plans-preview, seed PLAN_CREATED fixed dates (reference's real values) + 200ms product stagger; re-seeded dev DB (plans desc = [Family, Starter, Pro, Basic]; featured desc = [Pre, Yoga, Dumbbells, Whey]).
+- Gates: lint ✓ typecheck ✓ unit 47/47 ✓ build ✓ e2e 58/58 ✓. Final VLM home comparison MATCH (mobile full-page, stepped-scroll settled).
+- 13 screenshots re-captured in docs/screenshots/; docs updated (README, AGENTS, CLAUDE, PAD v1.3, SKILL v1.3.0, new docs/session_6.md completion log); committed on main and pushed via docs/ssh_git_wrapper_v3.py (fingerprint-verified key, dry-run then real push, remote ref verified, key shredded).
+
+Stage Summary:
+- Session 5 delivered: home-preview hardcoded middle card + deterministic seed ordering (3 defects fixed, 7 unit + 1 new e2e spec, 2 specs strengthened); all gates green; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
