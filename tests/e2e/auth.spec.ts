@@ -11,13 +11,15 @@ test.use({ storageState: { cookies: [], origins: [] } });
 test.describe("login route", () => {
   test("renders the auth card with the circular logo chip", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: "Welcome to Project Management App" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Welcome to FitPro GYM App" })
+    ).toBeVisible();
+    await expect(page.getByText("Sign in to continue")).toBeVisible();
 
-    // v2.3: the logo is a white CIRCULAR chip (rounded-full + ring-4
-    // ring-white/50 + shadow-lg), not the retired rounded-square mark.
+    // The logo is a circular chip (rounded-full + ring-4 ring-white/50).
     // (Tailwind v4 computes rounded-full as calc(infinity * 1px) → Chrome
-    // reports 33554432px, and ring-white/50 serializes in oklab() — so the
-    // assertions check the geometry and the 4px ring, not exact strings.)
+    // reports 33554432px, so the assertion checks the geometry, not exact
+    // strings.)
     const chip = page.locator("span.rounded-full.ring-4").first();
     await expect(chip).toBeVisible();
     const radius = await chip.evaluate((el) => parseFloat(getComputedStyle(el).borderRadius));
@@ -26,35 +28,46 @@ test.describe("login route", () => {
     expect(shadow).toMatch(/0\.5\) 0px 0px 0px 4px/);
   });
 
+  test("renders the Google button, OR divider, and icon inputs", async ({ page }) => {
+    await page.goto("/login");
+    await expect(page.getByRole("button", { name: "Continue with Google" })).toBeVisible();
+    await expect(page.getByText("or", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Email")).toBeVisible();
+    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign up" })).toBeVisible();
+  });
+
   test("wrong password is rejected without a session", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email").fill("demo@orbital.app");
+    await page.getByLabel("Email").fill("demo@fitpro.app");
     await page.getByLabel("Password").fill("definitely-wrong");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    // .first(): a double-render of the toast (observed once in a full-suite
-    // run) must not turn the rejection check into a strict-mode violation —
-    // any visible instance proves the 401 path.
-    await expect(page.getByText("Incorrect email or password").first()).toBeVisible({ timeout: 15_000 });
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(page.getByText("Incorrect email or password").first()).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("valid credentials sign in and land on the workspace", async ({ page }) => {
+  test("valid credentials sign in and land on Home", async ({ page }) => {
     await page.goto("/login");
-    await page.getByLabel("Email").fill("demo@orbital.app");
+    await page.getByLabel("Email").fill("demo@fitpro.app");
     await page.getByLabel("Password").fill("Demo1234!");
-    await page.getByRole("button", { name: "Sign in" }).click();
-    await expect(page).toHaveURL(/\/$/, { timeout: 15_000 });
-    // Desktop chrome: the sticky sidebar (not the mobile app bar) is the
-    // visible landmark once signed in.
-    await expect(page.locator("aside")).toBeVisible();
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(page).toHaveURL(/\/Home/, { timeout: 15_000 });
+    // Desktop chrome: the sticky header is the visible landmark once in.
+    await expect(page.locator("header")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Unleash Your", exact: false })
+    ).toBeVisible();
   });
 
-  test("authenticated visits redirect /login back to the workspace", async ({ page }) => {
+  test("authenticated visits redirect /login back to Home", async ({ page }) => {
     const res = await page.request.post("/api/auth/login", {
-      data: { email: "demo@orbital.app", password: "Demo1234!" },
+      data: { email: "demo@fitpro.app", password: "Demo1234!" },
     });
     expect(res.ok()).toBeTruthy();
     await page.goto("/login");
-    await expect(page).toHaveURL(/\/$/);
+    await expect(page).toHaveURL(/\/Home/);
   });
 });

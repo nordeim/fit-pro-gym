@@ -1,7 +1,6 @@
-// ORBITAL — AI Project Management workspace
-// Prisma schema (SQLite). Mirrors the domain model of the reference app:
-// login users, AI-known assignee persons, invited workspace members/agents,
-// goals, tasks, task check-in updates, agent activity log, workspace settings.
+// FitPro GYM App — Prisma schema (SQLite).
+// Mirrors the domain model of the reference app (base44 entities):
+// User, Membership plans, Shop products, CartItems per user, Orders.
 
 generator client {
   provider = "prisma-client-js"
@@ -12,112 +11,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Login users (email + password). The reference app stores the display
+// name as full_name; we keep `name` and expose it as full_name in the API.
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
   name         String
   passwordHash String
-  avatarColor  String   @default("#996CE4")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
 
-// Assignee entities — the people the AI plans reference (seeded demo people)
-// plus one linked Person per login user so "My Tasks" resolves.
-model Person {
-  id          String   @id @default(cuid())
-  name        String
-  avatarColor String   @default("#996CE4")
-  userId      String?  @unique
-  createdAt   DateTime @default(now())
-
-  tasks Task[]
-
-  @@index([name])
+// Membership plans ("Membership" entity in the reference app).
+// features: the reference stores a JSON array of strings; SQLite has no
+// native scalar lists, so it is kept as a JSON string and (de)serialized at
+// the API boundary (src/lib/serialize.ts).
+model MembershipPlan {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  durationMonths Int    @default(1)
+  features      String   @default("[]")
+  popular       Boolean  @default(false)
+  colorScheme   String   @default("blue") // blue | green | purple | orange
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
-// Invited workspace members (humans) and configured AI agents.
-// Starts empty in a fresh workspace, like the reference app.
-model TeamMember {
-  id          String   @id @default(cuid())
-  name        String
-  email       String?
-  role        String?
-  avatarColor String   @default("#996CE4")
-  kind        String   @default("human") // "human" | "agent"
-  agentRole   String? // e.g. "Project Assistant"
-  description String? // agent: what it does (New Agent form)
-  instructions String? // agent: how it should behave (New Agent form)
-  createdAt   DateTime @default(now())
+// Shop products ("Product" entity).
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  category      String   @default("equipment") // supplements | equipment | accessories | ...
+  imageUrl      String?
+  stockQuantity Int      @default(0)
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@index([featured])
 }
 
-model Goal {
-  id          String    @id @default(cuid())
-  title       String
-  description String?
-  status      String    @default("active") // active | done | draft | paused
-  targetDate  DateTime?
-  sortOrder   Int       @default(0)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  tasks Task[]
-
-  @@index([status])
-}
-
-model Task {
-  id             String    @id @default(cuid())
-  goalId         String
-  title          String
-  description    String?
-  status         String    @default("pending") // pending | in_progress | blocked | need_help | done
-  deadline       DateTime?
-  assigneeId     String?
-  estimatedHours Float?
-  createdByAi    Boolean   @default(false)
-  sortOrder      Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
-  goal     Goal         @relation(fields: [goalId], references: [id], onDelete: Cascade)
-  assignee Person?      @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
-  updates  TaskUpdate[]
-
-  @@index([goalId])
-  @@index([assigneeId])
-  @@index([status])
-}
-
-model TaskUpdate {
+// Per-user cart lines ("CartItem" entity). The reference deduplicates
+// (user_email, item_type, item_id) in application code by checking before
+// insert and bumping quantity — we keep the same app-level logic and make
+// the pair unique at the storage layer too for defense in depth.
+model CartItem {
   id        String   @id @default(cuid())
-  taskId    String
-  status    String // on_track | blocked | need_help | done
-  note      String?
+  userEmail String
+  itemType  String // "product" | "membership"
+  itemId    String
+  itemName  String
+  price     Float
+  quantity  Int      @default(1)
+  imageUrl  String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-
-  @@index([taskId])
+  @@unique([userEmail, itemType, itemId])
+  @@index([userEmail])
 }
 
-model ActivityLog {
-  id        String   @id @default(cuid())
-  type      String // task_assigned | tasks_generated | goal_created | goal_completed | status_update | member_invited | agent_created | task_created | task_deleted | goal_deleted | settings_updated
-  message   String
-  detail    String?
-  taskId    String?
-  goalId    String?
-  createdAt DateTime @default(now())
+// Placed orders ("Order" entity). items and shippingAddress are JSON
+// strings mirroring the reference shapes:
+//   items:          [{ name, type, price, quantity }]
+//   shippingAddress: { street, city, state, zip }
+model Order {
+  id              String   @id @default(cuid())
+  userEmail       String
+  totalAmount     Float
+  items           String // JSON array of {name, type, price, quantity}
+  shippingAddress String // JSON object {street, city, state, zip}
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
 
+  @@index([userEmail])
   @@index([createdAt])
-}
-
-model WorkspaceSetting {
-  id            String @id @default("singleton")
-  name          String @default("My Team")
-  workStart     String @default("09:00")
-  workEnd       String @default("17:00")
-  pingFrequency String @default("once_daily") // once_daily | twice_daily | weekly
-  aiTone        String @default("friendly") // friendly | professional | concise
 }

@@ -1,11 +1,11 @@
 {
-  "name": "activity-map",
+  "name": "fit-pro-gym",
   "version": "1.0.0",
-  "description": "Next.js 16 + React 19 + Prisma/SQLite",
+  "description": "FitPro GYM App - Next.js 16 + React 19 + Tailwind v4 + Prisma/SQLite clone",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && mkdir -p .next/standalone/prisma && cp prisma/schema.prisma .next/standalone/prisma/",
     "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
     "lint": "eslint .",
     "db:push": "prisma db push --accept-data-loss",
@@ -30,6 +30,7 @@
     "@radix-ui/react-toast": "^1.2.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^13.4.4",
     "lucide-react": "^0.525.0",
     "next": "^16.3.6",
     "prisma": "^6.19.3",

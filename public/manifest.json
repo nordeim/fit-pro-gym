@@ -1,0 +1,12 @@
+{
+  "name": "FitPro GYM App",
+  "short_name": "FitPro GYM App",
+  "description": "Your all-in-one fitness solution. Seamlessly manage gym memberships and shop premium fitness gear, supplements, and apparel.",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "start_url": "/Home",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
