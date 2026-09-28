@@ -228,10 +228,10 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 |-------|--------|------------------|
 | Recon & design extraction | ✅ Complete | Reference app audited (DOM, bundle, entity API, VLM) — exact tokens/markup captured |
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
-| Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) — live-verified 5 consecutive sessions, zero Tailwind v4 bugs |
+| Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) — live-verified 6 consecutive sessions, zero Tailwind v4 bugs |
 | Test suites | ✅ Complete | 47 unit + 74 e2e (incl. 22 home reference-parity specs, icon-geometry/404 pins, shop card geometry/gap/empty-state pins, hero typography-cascade pins, login label geometry pins), all green; lint + typecheck clean |
-| Reference-parity upkeep | ✅ Session 9 | Zero code defects — full re-audit confirmed parity (mobile nav 5th consecutive session, tie order stable at [Yoga, Dumbbells, Pre-Workout, Whey], all pinned geometries exact); one docs-consistency fix (a stale PAD §15 ledger row from the session-8 update) |
-| Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md (v1.6.1) |
+| Reference-parity upkeep | ✅ Session 10 | Zero defects (second consecutive clean cycle) — full re-audit confirmed parity (mobile nav 6th consecutive session, tie order stable at [Yoga, Dumbbells, Pre-Workout, Whey], all pinned geometries exact on both sites); 12 screenshots re-captured, dimensions identical to the prior batch |
+| Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md (v1.6.2) |
 
 ## License
 

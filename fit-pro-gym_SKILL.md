@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.6.1
+version: 1.6.2
 last_updated: 2026-09-28
-project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 9 — zero code defects: the reference's product tie order re-audited STABLE at [Yoga, Dumbbells, Pre, Whey] (junk row still displacing Whey); mobile nav verified a 5th consecutive session, zero Tailwind v4 bugs; one docs-consistency fix — the PAD §15 ledger's third product-order row had been left stale by the session-8 update)
+project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 10 — ZERO defects, second consecutive clean cycle: tie order re-audited STABLE at [Yoga, Dumbbells, Pre, Whey] (junk row still displacing Whey); mobile nav verified a 6th consecutive session, zero Tailwind v4 bugs; all 12 screenshots re-captured with dimensions matching the prior batch exactly)
 tags:
   - nextjs
   - tailwind-v4
