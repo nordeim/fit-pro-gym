@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.6.2
-last_updated: 2026-09-28
-project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 10 — ZERO defects, second consecutive clean cycle: tie order re-audited STABLE at [Yoga, Dumbbells, Pre, Whey] (junk row still displacing Whey); mobile nav verified a 6th consecutive session, zero Tailwind v4 bugs; all 12 screenshots re-captured with dimensions matching the prior batch exactly)
+version: 1.6.3
+last_updated: 2026-09-29
+project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 11 — ZERO defects, third consecutive clean cycle: tie order re-audited STABLE at [Yoga, Dumbbells, Pre, Whey] (junk row still displacing Whey); mobile nav verified a 7th consecutive session, zero Tailwind v4 bugs; all 12 screenshots re-captured with dimensions matching the prior batch exactly)
 tags:
   - nextjs
   - tailwind-v4
@@ -284,7 +284,7 @@ lists); parsing happens ONLY in `src/lib/serialize.ts`.
 |--------|------|-------|
 | User | 1 | `demo@fitpro.app` / `Demo1234!` |
 | MembershipPlan | 4 | Starter $29 (orange), Basic Fit $39 (blue), Pro Athlete $59 (green, popular — 6 features incl. Recovery room access), Family Pack $149 (purple). Fixed `PLAN_CREATED` dates mirror the reference's real entity dates (two tie groups: 2025-07-01 / 2025-07-30) |
-| Product | 4 | The reference's REAL entity data (all featured): Pre-Workout Energy $34 (supplements), Yoga Mat Premium $79 (accessories), Professional Dumbbells Set $299 (equipment), Whey Protein Powder $49 (supplements). 200ms `createdAt` stagger pins the featured `-created_date` tie order — which is SERVER-DRIFTABLE: re-audited live 2026-09-28 at [Yoga Mat, Dumbbells, Pre-Workout, Whey] (flipped from the session-5 order; the reference's featured XSS junk row, created 2026-05-15, now displaces Whey from its limit-4 window). Session-6 removed 4 invented demo rows that never existed on the reference |
+| Product | 4 | The reference's REAL entity data (all featured): Pre-Workout Energy $34 (supplements), Yoga Mat Premium $79 (accessories), Professional Dumbbells Set $299 (equipment), Whey Protein Powder $49 (supplements). 200ms `createdAt` stagger pins the featured `-created_date` tie order — which is SERVER-DRIFTABLE: re-audited live 2026-09-29 (sessions 8–11) at [Yoga Mat, Dumbbells, Pre-Workout, Whey] (flipped from the session-5 order; the reference's featured XSS junk row, created 2026-05-15, now displaces Whey from its limit-4 window). Session-6 removed 4 invented demo rows that never existed on the reference |
 
 Run: `DATABASE_URL="file:../db/custom.db" bun run db:seed` (the prefix guards
 against shell-env hijack). The reference's injected "XSS-INJECT-TEST" junk row
