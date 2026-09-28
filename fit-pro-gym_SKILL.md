@@ -7,9 +7,9 @@ description: >
   reference-parity contracts, auth/cart invariants, testing strategy,
   anti-patterns, and hard-won debugging knowledge. Use this to extend, debug,
   onboard, or replicate the codebase.
-version: 1.6.0
+version: 1.6.1
 last_updated: 2026-09-28
-project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 8 — the reference's product -created_date tie order re-audited and re-pinned [Yoga, Dumbbells, Pre, Whey]; its featured XSS junk row now displaces Whey from the home preview window; mobile nav verified a 4th consecutive session, zero Tailwind v4 bugs)
+project_state: 47 unit tests + 74 e2e specs green, lint/typecheck/build clean, reference-parity re-verified (session 9 — zero code defects: the reference's product tie order re-audited STABLE at [Yoga, Dumbbells, Pre, Whey] (junk row still displacing Whey); mobile nav verified a 5th consecutive session, zero Tailwind v4 bugs; one docs-consistency fix — the PAD §15 ledger's third product-order row had been left stale by the session-8 update)
 tags:
   - nextjs
   - tailwind-v4
@@ -403,6 +403,7 @@ Then the human-pass list:
 | 6 | A referenced-but-unwired env var (`NEXT_PUBLIC_SITE_URL`) is a doc bug: wire it or remove it. | Session-2 docs |
 | 7 | Seed data rots: verify every remote image URL with a HEAD request before shipping. | Session-2 seed fix |
 | 8 | The reference's `-created_date` tie order is server-side state, not a contract — it flipped between sessions with zero entity edits. Re-query the entity API every audit cycle and re-pin the stagger + e2e order pins when it moves. | Session-8 audit |
+| 9 | When a fact lives in MULTIPLE doc locations, grep for EVERY occurrence before calling the edit done — session 8 re-pinned the tie order in 5 of 6 places and left PAD §15's "Home shop preview / cross-sell" row stale, shipping an internally inconsistent "definitive" reference that session 9 had to catch. Cross-doc consistency is itself a pinned surface. | Session-9 audit |
 
 ---
 

@@ -155,3 +155,20 @@ Work Log:
 
 Stage Summary:
 - Session 8 delivered: the reference's server-driftable -created_date tie order re-audited and re-pinned across the seed + 2 e2e order specs; mobile nav re-verified (4th consecutive session, zero v4 bugs); all pinned geometries confirmed at parity; docs + screenshots refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
+
+---
+Task ID: 12
+Agent: Super Z (main, session 9)
+Task: Session-9 cycle: refresh, re-audit live target (mobile menu first), remediate parity defects (TDD), screenshots, docs, push to main
+
+Work Log:
+- Pulled the user's d239a9b (docs/session_13.md = the session-8 run transcript); re-reviewed all root docs + session_12/13 + worklog; validated the codebase (src tree, header mobile-nav patterns, vitest/playwright configs, .env/.env.example alignment, lucide 0.475.0 pin, db/ at the repo root). Gates on arrival: lint/typecheck clean, 47/47 unit, build OK, 74/74 e2e — dev server on :3000 healthy and serving the pinned order.
+- Audited the live target (logged in with the provided credentials): mobile menu verified end-to-end on BOTH sites at 390x844 (hamburger/X swap, structure, 48px targets, active pill, route-change close, X close — 5th consecutive session with zero Tailwind v4 bugs); entity API re-queried — product tie order UNCHANGED from session 8 ([junk, Yoga, Dumbbells, Pre, Whey] stable x3 fetches; memberships unchanged); pinned geometries re-measured at parity on both sites (hero 840px desktop / 1111px mobile with 60/45px h1 lines + 32/33px ledes, Memberships hero 424px, Shop h1 48px + #737373 placeholder + untyped search, login card 746px + plain 20px labels, pointer cursors); full-page text diffs across all 5 routes clean modulo the documented junk-row exclusion + avatar initial; cross-sell dedupe path exercised live on the clone (qty bump + distinct toast, no dialog on duplicates); target CSS bundle unchanged (index-BCeQAlMu.css); /signup still serves the branded 404.
+- Found 1 DOCS defect (S9-C1): PAD §15's "Home shop preview / cross-sell" ledger row still carried the stale session-5 tie order [Pre, Yoga, Dumbbells, Whey] — the session-8 update had fixed the sibling rows but missed this one, leaving the definitive reference internally inconsistent. No code defects: the seed stagger + both e2e order pins already carry the current order (nothing to RED-GREEN).
+- Remediation: PAD §15 row fixed to the current audited order + junk-row displacement note; cross-doc sweep grepped every order-carrying location (all current-state mentions now agree; historical revision blocks untouched); PAD v1.6.1 revision block; SKILL v1.6.1 (project_state + lesson #9: grep every doc occurrence before calling a re-pin done); README status table (Session 9, 5-consecutive mobile-nav, PAD v1.6.1); AGENTS.md gotcha (stable x3 re-confirmed + grep-every-doc warning); CLAUDE.md parity note (re-confirmed STABLE); docs/prompt-to-review-5.md saved (secrets stripped); docs/session_14.md completion log.
+- Screenshots: all 12 re-captured with the canonical 3-line cart (Starter x3 + Yoga + Pre = $200) populated via the API with the seed's real image URLs; pixel-verified against the prior batch (cart-mobile exactly 390x2067 again; new captures show the photo tiles loaded — session-8's had an image-loading race artifact — and the settled hero behind the mobile menu); the cross-sell capture's Family Pack side-effect line removed before the cart shots.
+- Gates: lint ✓ typecheck ✓ unit 47/47 ✓ build ✓ e2e 74/74 ✓ (no code deltas — the suite re-ran green as the final verification). .env.example verified verbatim against the codebase and riding in the commit.
+- Committed on main and pushed via docs/ssh_git_wrapper_v3.py (fingerprint-verified key, dry-run then real push, remote ref verified, key shredded).
+
+Stage Summary:
+- Session 9 delivered: a clean bill of health for the codebase (zero parity defects, tie order stable, mobile nav 5th consecutive verification) plus the cross-doc consistency fix the session-8 update had left behind (PAD §15 stale ledger row); 12 screenshots + 9 docs refreshed; pushed to git@github.com:nordeim/fit-pro-gym.git main.
