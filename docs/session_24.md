@@ -135,6 +135,13 @@ byte-identical. `/signup` still renders the identical branded 404 quoting
 4. **`.env.example`** re-verified verbatim against the codebase and riding in
    the commit.
 5. **Final gates + commit + SSH-wrapper push** (see the verification summary).
+   Deploy-key note for future sessions: the operator-supplied key this cycle
+   authenticates and pushes, but its fingerprint is
+   `SHA256:3ddaNlFhMz1JXiGEDgVEaRsUzI4Ev0IpGEEB7NnU4PU` — a ROTATION from
+   the `SHA256:4rAzu5gC41giPSWmIojTc1isH0FGoGiSgYJkDcMp54g` recorded in
+   sessions 11–13 (verified structurally intact: loads as a valid Ed25519
+   key, comment `peter@pop-os`). Compare against THIS fingerprint going
+   forward, not the older one.
 
 ## Verification summary
 
