@@ -230,8 +230,8 @@ This repo is a CSS-first Tailwind v4 codebase (validated in `docs/Tailwind-V4-Va
 | App implementation | ✅ Complete | 5 routes, 11 API endpoints, 5 Prisma models, seeded catalog |
 | Mobile navigation hardening | ✅ Complete | State-driven menu + 8 e2e specs (aria, auto-close, touch targets) — live-verified 10 consecutive sessions, zero Tailwind v4 bugs |
 | Test suites | ✅ Complete | 47 unit + 74 e2e (incl. 22 home reference-parity specs, icon-geometry/404 pins, shop card geometry/gap/empty-state pins, hero typography-cascade pins, login label geometry pins), all green; lint + typecheck clean |
-| Reference-parity upkeep | ✅ Session 14 | Zero defects (sixth consecutive clean cycle) — full re-audit confirmed parity (mobile nav 10th consecutive session with the active-pill exact-match semantics re-verified on both sites incl. the no-pill-at-root case, tie order stable at [Yoga, Dumbbells, Pre-Workout, Whey], all pinned geometries exact on both sites); 12 screenshots re-captured, dimensions identical to the prior batch |
-| Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md (v1.6.6) |
+| Reference-parity upkeep | ✅ Session 15 | Zero defects (seventh consecutive clean cycle) — full re-audit confirmed parity (mobile nav 11th consecutive session with the active-pill exact-match semantics re-verified on both sites incl. the no-pill-at-root case, tie order stable at [Yoga, Dumbbells, Pre-Workout, Whey], all pinned geometries exact on both sites); 12 screenshots re-captured, dimensions identical to the prior batch |
+| Documentation | ✅ Complete | README, AGENTS.md, CLAUDE.md, Project_Architecture_Document.md (v1.6.7) |
 
 ## License
 
